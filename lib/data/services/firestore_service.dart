@@ -1,0 +1,71 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../core/constants/firestore_paths.dart';
+import '../models/content_item_model.dart';
+import '../models/playlist_model.dart';
+
+class FirestoreService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  // ─── Content ───────────────────────────────────────────────────────────────
+
+  Future<void> saveContent(ContentItemModel item) async {
+    await _db.collection(FirestorePaths.content).doc(item.id).set(item.toMap());
+  }
+
+  Future<void> deleteContent(String id) async {
+    await _db.collection(FirestorePaths.content).doc(id).delete();
+  }
+
+  Future<ContentItemModel?> getContent(String id) async {
+    final doc = await _db.collection(FirestorePaths.content).doc(id).get();
+    if (!doc.exists) return null;
+    return ContentItemModel.fromFirestore(doc);
+  }
+
+  Stream<List<ContentItemModel>> watchContentByType(ContentType type) {
+    return _db
+        .collection(FirestorePaths.content)
+        .where('type', isEqualTo: contentTypeToString(type))
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((d) => ContentItemModel.fromFirestore(d)).toList());
+  }
+
+  Future<List<ContentItemModel>> getAllContent() async {
+    final snap = await _db
+        .collection(FirestorePaths.content)
+        .orderBy('createdAt', descending: true)
+        .get();
+    return snap.docs.map((d) => ContentItemModel.fromFirestore(d)).toList();
+  }
+
+  // ─── Playlist ──────────────────────────────────────────────────────────────
+
+  Future<void> publishPlaylist(PlaylistModel playlist) async {
+    await _db
+        .doc(FirestorePaths.activePlaylist)
+        .set(playlist.toMap());
+  }
+
+  Stream<PlaylistModel?> watchActivePlaylist() {
+    return _db.doc(FirestorePaths.activePlaylist).snapshots().map((snap) {
+      if (!snap.exists || snap.data() == null) return null;
+      return PlaylistModel.fromMap(snap.data()!);
+    });
+  }
+
+  Future<PlaylistModel?> getActivePlaylist() async {
+    final doc = await _db.doc(FirestorePaths.activePlaylist).get();
+    if (!doc.exists || doc.data() == null) return null;
+    return PlaylistModel.fromMap(doc.data()!);
+  }
+
+  // ─── Admin check ───────────────────────────────────────────────────────────
+
+  Future<bool> isAdmin(String uid) async {
+    final doc =
+        await _db.collection(FirestorePaths.admins).doc(uid).get();
+    return doc.exists;
+  }
+}
