@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,16 +13,21 @@ class UploadImageScreen extends ConsumerStatefulWidget {
 
 class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
   final _titleCtrl = TextEditingController();
-  File? _selectedFile;
+  Uint8List? _fileBytes;
+  String? _fileName;
+  int _fileSize = 0;
 
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
+      withData: true,
     );
-    if (result != null && result.files.single.path != null) {
+    if (result != null && result.files.single.bytes != null) {
       setState(() {
-        _selectedFile = File(result.files.single.path!);
+        _fileBytes = result.files.single.bytes!;
+        _fileName = result.files.single.name;
+        _fileSize = result.files.single.size;
         if (_titleCtrl.text.isEmpty) {
           _titleCtrl.text =
               result.files.single.name.replaceAll(RegExp(r'\.[^.]+$'), '');
@@ -32,10 +37,13 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
   }
 
   Future<void> _upload() async {
-    if (_selectedFile == null || _titleCtrl.text.isEmpty) return;
-    await ref
-        .read(uploadNotifierProvider.notifier)
-        .uploadImage(_selectedFile!, _titleCtrl.text.trim());
+    if (_fileBytes == null || _titleCtrl.text.isEmpty) return;
+    await ref.read(uploadNotifierProvider.notifier).uploadImage(
+          bytes: _fileBytes!,
+          fileName: _fileName!,
+          title: _titleCtrl.text.trim(),
+          fileSizeBytes: _fileSize,
+        );
     if (mounted) Navigator.pop(context);
   }
 
@@ -61,7 +69,7 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
             ),
             const SizedBox(height: 24),
             GestureDetector(
-              onTap: _pickFile,
+              onTap: state.isUploading ? null : _pickFile,
               child: Container(
                 width: double.infinity,
                 height: 200,
@@ -69,14 +77,14 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
                   color: const Color(0xFF0F3460),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFE94560), width: 1.5),
-                  image: _selectedFile != null
+                  image: _fileBytes != null
                       ? DecorationImage(
-                          image: FileImage(_selectedFile!),
+                          image: MemoryImage(_fileBytes!),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                child: _selectedFile == null
+                child: _fileBytes == null
                     ? const Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -95,31 +103,64 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
             if (state.isUploading) ...[
               const SizedBox(height: 24),
               LinearProgressIndicator(
-                value: state.progress,
+                value: state.progress > 0 ? state.progress : null,
                 backgroundColor: const Color(0xFF0F3460),
                 color: const Color(0xFFE94560),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.progress > 0
+                    ? '${(state.progress * 100).toStringAsFixed(0)}% yükleniyor...'
+                    : 'Hazırlanıyor...',
+                style: const TextStyle(color: Colors.white54),
               ),
             ],
             if (state.error != null) ...[
               const SizedBox(height: 12),
-              Text(state.error!,
-                  style: const TextStyle(color: Color(0xFFE94560))),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE94560).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline,
+                        color: Color(0xFFE94560), size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(state.error!,
+                          style: const TextStyle(
+                              color: Color(0xFFE94560), fontSize: 13)),
+                    ),
+                  ],
+                ),
+              ),
             ],
             const Spacer(),
             SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: (_selectedFile != null && !state.isUploading)
+                onPressed: (_fileBytes != null && !state.isUploading)
                     ? _upload
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE94560),
+                  disabledBackgroundColor:
+                      const Color(0xFFE94560).withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('Yükle',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: state.isUploading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text('Yükle',
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
           ],

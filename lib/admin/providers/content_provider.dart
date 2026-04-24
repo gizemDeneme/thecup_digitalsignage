@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/service_locator.dart';
 import '../../data/models/content_item_model.dart';
@@ -34,12 +34,19 @@ class UploadNotifier extends StateNotifier<UploadState> {
 
   UploadNotifier(this._repo) : super(const UploadState());
 
-  Future<void> uploadVideo(File file, String title) async {
+  Future<void> uploadVideo({
+    required Uint8List bytes,
+    required String fileName,
+    required String title,
+    required int fileSizeBytes,
+  }) async {
     state = const UploadState(isUploading: true, progress: 0);
     try {
       await _repo.uploadVideo(
-        file: file,
+        bytes: bytes,
+        fileName: fileName,
         title: title,
+        fileSizeBytes: fileSizeBytes,
         onProgress: (p) => state = UploadState(isUploading: true, progress: p),
       );
       state = const UploadState(progress: 1);
@@ -48,12 +55,19 @@ class UploadNotifier extends StateNotifier<UploadState> {
     }
   }
 
-  Future<void> uploadImage(File file, String title) async {
+  Future<void> uploadImage({
+    required Uint8List bytes,
+    required String fileName,
+    required String title,
+    required int fileSizeBytes,
+  }) async {
     state = const UploadState(isUploading: true, progress: 0);
     try {
       await _repo.uploadImage(
-        file: file,
+        bytes: bytes,
+        fileName: fileName,
         title: title,
+        fileSizeBytes: fileSizeBytes,
         onProgress: (p) => state = UploadState(isUploading: true, progress: p),
       );
       state = const UploadState(progress: 1);

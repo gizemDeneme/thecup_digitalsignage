@@ -1,15 +1,18 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  UploadTask uploadFile({
-    required File file,
+  UploadTask uploadData({
+    required Uint8List bytes,
     required String path,
+    String? contentType,
   }) {
     final ref = _storage.ref(path);
-    return ref.putFile(file);
+    final metadata =
+        contentType != null ? SettableMetadata(contentType: contentType) : null;
+    return metadata != null ? ref.putData(bytes, metadata) : ref.putData(bytes);
   }
 
   Future<String> getDownloadUrl(String path) async {
