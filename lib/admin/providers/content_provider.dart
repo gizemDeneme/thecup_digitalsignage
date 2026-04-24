@@ -16,6 +16,12 @@ final allContentProvider = FutureProvider<List<ContentItemModel>>((ref) {
   return ref.read(contentRepositoryProvider).getAll();
 });
 
+/// contentId → title map, playlist editörünün içerik adlarını göstermesi için
+final contentTitleMapProvider = FutureProvider<Map<String, String>>((ref) async {
+  final list = await ref.read(contentRepositoryProvider).getAll();
+  return {for (final c in list) c.id: c.title};
+});
+
 // Upload progress state
 class UploadState {
   final bool isUploading;

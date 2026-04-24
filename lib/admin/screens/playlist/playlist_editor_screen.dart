@@ -113,6 +113,9 @@ class _PlaylistItemTile extends ConsumerWidget {
     };
 
     final hasSchedule = item.startMinutes != null;
+    final contentId = item.contentRef.split('/').last;
+    final titleMap = ref.watch(contentTitleMapProvider).value ?? {};
+    final displayTitle = titleMap[contentId] ?? contentId;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -124,6 +127,8 @@ class _PlaylistItemTile extends ConsumerWidget {
             : null,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Main row ──────────────────────────────────────────────────────
           Padding(
@@ -136,7 +141,7 @@ class _PlaylistItemTile extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    item.contentRef.split('/').last,
+                    displayTitle,
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -179,42 +184,50 @@ class _PlaylistItemTile extends ConsumerWidget {
             ),
           ),
           // ── Time range row ────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: GestureDetector(
-              onTap: () => _showTimePicker(context, ref),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
+          GestureDetector(
+            onTap: () => _showTimePicker(context, ref),
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: hasSchedule
+                    ? const Color(0xFFE94560).withValues(alpha: 0.15)
+                    : const Color(0xFF0F3460),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
                   color: hasSchedule
-                      ? const Color(0xFFE94560).withValues(alpha: 0.15)
-                      : const Color(0xFF0F3460),
-                  borderRadius: BorderRadius.circular(6),
+                      ? const Color(0xFFE94560)
+                      : Colors.white24,
+                  width: 1,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      hasSchedule ? Icons.schedule : Icons.all_inclusive,
-                      color: hasSchedule
-                          ? const Color(0xFFE94560)
-                          : Colors.white38,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      item.timeRangeLabel,
-                      style: TextStyle(
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        hasSchedule ? Icons.schedule : Icons.all_inclusive,
                         color: hasSchedule
                             ? const Color(0xFFE94560)
-                            : Colors.white38,
-                        fontSize: 12,
+                            : Colors.white70,
+                        size: 14,
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.edit, color: Colors.white24, size: 12),
-                  ],
-                ),
+                      const SizedBox(width: 6),
+                      Text(
+                        item.timeRangeLabel,
+                        style: TextStyle(
+                          color: hasSchedule
+                              ? const Color(0xFFE94560)
+                              : Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Icon(Icons.edit, color: Colors.white38, size: 14),
+                ],
               ),
             ),
           ),
