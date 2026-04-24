@@ -19,11 +19,13 @@ final allContentProvider = FutureProvider<List<ContentItemModel>>((ref) {
 // Upload progress state
 class UploadState {
   final bool isUploading;
+  final bool isCompressing;
   final double progress;
   final String? error;
 
   const UploadState({
     this.isUploading = false,
+    this.isCompressing = false,
     this.progress = 0,
     this.error,
   });
@@ -61,14 +63,14 @@ class UploadNotifier extends StateNotifier<UploadState> {
     required String title,
     required int fileSizeBytes,
   }) async {
-    state = const UploadState(isUploading: true, progress: 0);
+    state = const UploadState(isUploading: true, isCompressing: true, progress: 0);
     try {
       await _repo.uploadImage(
         bytes: bytes,
         fileName: fileName,
         title: title,
         fileSizeBytes: fileSizeBytes,
-        onProgress: (p) => state = UploadState(isUploading: true, progress: p),
+        onProgress: (p) => state = UploadState(isUploading: true, isCompressing: false, progress: p),
       );
       state = const UploadState(progress: 1);
     } catch (e) {

@@ -1,30 +1,74 @@
+import 'dart:convert';
 import 'dart:typed_data';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
+
+class _Cloudinary {
+  static const String cloudName = 'dxdwxetle';
+  static const String uploadPreset = 'thecup_uploads';
+}
+
+class StorageUploadResult {
+  final String downloadUrl;
+  final String publicId;
+  final int sizeBytes;
+
+  const StorageUploadResult({
+    required this.downloadUrl,
+    required this.publicId,
+    required this.sizeBytes,
+  });
+}
 
 class StorageService {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-
-  UploadTask uploadData({
+  /// Uploads bytes to Cloudinary.
+  /// [resourceType] is 'image' or 'video'.
+  Future<StorageUploadResult> uploadData({
     required Uint8List bytes,
     required String path,
-    String? contentType,
-  }) {
-    final ref = _storage.ref(path);
-    final metadata =
-        contentType != null ? SettableMetadata(contentType: contentType) : null;
-    return metadata != null ? ref.putData(bytes, metadata) : ref.putData(bytes);
-  }
+    required String resourceType,
+    void Function(double progress)? onProgress,
+  }) async {
+    onProgress?.call(0.05);
 
-  Future<String> getDownloadUrl(String path) async {
-    return _storage.ref(path).getDownloadURL();
-  }
+    final uri = Uri.parse(
+      'https://api.cloudinary.com/v1_1/${_Cloudinary.cloudName}/$resourceType/upload',
+    );
 
-  Future<void> deleteFile(String storageUrl) async {
-    try {
-      final ref = _storage.refFromURL(storageUrl);
-      await ref.delete();
-    } catch (_) {
-      // File may already be deleted
+    final request = http.MultipartRequest('POST', uri)
+      ..fields['upload_preset'] = _Cloudinary.uploadPreset
+      ..fields['folder'] = path.contains('/') ? path.split('/').first : 'thecup'
+      ..files.add(http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: path.split('/').last,
+      ));
+
+    onProgress?.call(0.1);
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(
+        body['error']?['message'] ?? 'Yükleme başarısız (${response.statusCode})',
+      );
     }
+
+    onProgress?.call(1.0);
+
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return StorageUploadResult(
+      downloadUrl: json['secure_url'] as String,
+      publicId: json['public_id'] as String,
+      sizeBytes: (json['bytes'] as num).toInt(),
+    );
+  }
+
+  /// Deletes a file from Cloudinary by publicId.
+  /// Requires signed API call — skipped on client side.
+  /// Files can be managed from Cloudinary dashboard if needed.
+  Future<void> deleteFile(String publicId) async {
+    // No-op: deletion is handled via Cloudinary dashboard
   }
 }

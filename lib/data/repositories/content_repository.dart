@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image/image.dart' as img;
 import '../models/content_item_model.dart';
 import '../services/firestore_service.dart';
 import '../services/storage_service.dart';
@@ -17,6 +17,25 @@ class ContentRepository {
 
   Future<List<ContentItemModel>> getAll() => _firestore.getAllContent();
 
+  /// Resizes image to max 1920px wide and compresses to JPEG 85%.
+  Uint8List _compressImage(Uint8List bytes) {
+    try {
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) return bytes;
+      img.Image processed = decoded;
+      if (decoded.width > 1920) {
+        processed = img.copyResize(
+          decoded,
+          width: 1920,
+          interpolation: img.Interpolation.linear,
+        );
+      }
+      return Uint8List.fromList(img.encodeJpg(processed, quality: 85));
+    } catch (_) {
+      return bytes;
+    }
+  }
+
   Future<VideoItemModel> uploadVideo({
     required Uint8List bytes,
     required String fileName,
@@ -25,29 +44,21 @@ class ContentRepository {
     void Function(double progress)? onProgress,
   }) async {
     final id = _uuid.v4();
-    final path = 'videos/$id.mp4';
-    final task = _storage.uploadData(
+
+    final result = await _storage.uploadData(
       bytes: bytes,
-      path: path,
-      contentType: 'video/mp4',
+      path: 'videos/$id',
+      resourceType: 'video',
+      onProgress: onProgress,
     );
-
-    task.snapshotEvents.listen((snapshot) {
-      if (onProgress != null && snapshot.totalBytes > 0) {
-        onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
-      }
-    });
-
-    await task;
-    final downloadUrl = await _storage.getDownloadUrl(path);
 
     final item = VideoItemModel(
       id: id,
       title: title,
       createdAt: DateTime.now(),
-      storageUrl: 'gs://${FirebaseStorage.instance.bucket}/$path',
-      downloadUrl: downloadUrl,
-      fileSizeBytes: fileSizeBytes,
+      storageUrl: result.publicId,
+      downloadUrl: result.downloadUrl,
+      fileSizeBytes: result.sizeBytes,
       durationSeconds: 0,
     );
     await _firestore.saveContent(item);
@@ -62,31 +73,24 @@ class ContentRepository {
     void Function(double progress)? onProgress,
   }) async {
     final id = _uuid.v4();
-    final ext = fileName.split('.').last.toLowerCase();
-    final path = 'images/$id.$ext';
-    final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
-    final task = _storage.uploadData(
-      bytes: bytes,
-      path: path,
-      contentType: contentType,
+
+    // Compress before upload (max 1920px wide, JPEG 85%)
+    final compressed = _compressImage(bytes);
+
+    final result = await _storage.uploadData(
+      bytes: compressed,
+      path: 'images/$id',
+      resourceType: 'image',
+      onProgress: onProgress,
     );
-
-    task.snapshotEvents.listen((snapshot) {
-      if (onProgress != null && snapshot.totalBytes > 0) {
-        onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
-      }
-    });
-
-    await task;
-    final downloadUrl = await _storage.getDownloadUrl(path);
 
     final item = ImageItemModel(
       id: id,
       title: title,
       createdAt: DateTime.now(),
-      storageUrl: 'gs://${FirebaseStorage.instance.bucket}/$path',
-      downloadUrl: downloadUrl,
-      fileSizeBytes: fileSizeBytes,
+      storageUrl: result.publicId,
+      downloadUrl: result.downloadUrl,
+      fileSizeBytes: result.sizeBytes,
     );
     await _firestore.saveContent(item);
     return item;
@@ -102,6 +106,7 @@ class ContentRepository {
 
   Future<void> delete(ContentItemModel item) async {
     await _firestore.deleteContent(item.id);
+    // storageUrl is Cloudinary publicId — no-op delete on client side
     if (item is VideoItemModel) {
       await _storage.deleteFile(item.storageUrl);
     } else if (item is ImageItemModel) {

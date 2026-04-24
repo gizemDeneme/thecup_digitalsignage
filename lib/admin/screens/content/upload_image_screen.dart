@@ -103,15 +103,17 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
             if (state.isUploading) ...[
               const SizedBox(height: 24),
               LinearProgressIndicator(
-                value: state.progress > 0 ? state.progress : null,
+                value: state.isCompressing ? null : (state.progress > 0 ? state.progress : null),
                 backgroundColor: const Color(0xFF0F3460),
                 color: const Color(0xFFE94560),
               ),
               const SizedBox(height: 8),
               Text(
-                state.progress > 0
-                    ? '${(state.progress * 100).toStringAsFixed(0)}% yükleniyor...'
-                    : 'Hazırlanıyor...',
+                state.isCompressing
+                    ? 'Sıkıştırılıyor...'
+                    : state.progress > 0
+                        ? '${(state.progress * 100).toStringAsFixed(0)}% yükleniyor...'
+                        : 'Başlatılıyor...',
                 style: const TextStyle(color: Colors.white54),
               ),
             ],
