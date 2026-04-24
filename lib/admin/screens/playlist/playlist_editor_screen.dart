@@ -53,24 +53,20 @@ class PlaylistEditorScreen extends ConsumerWidget {
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '${items.length} içerik',
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                      Text(
-                        'Toplam: ${mins}d ${secs}s',
-                        style: const TextStyle(color: Colors.white70),
-                      ),
+                      Text('${items.length} içerik',
+                          style: const TextStyle(color: Colors.white70)),
+                      Text('Toplam: ${mins}d ${secs}s',
+                          style: const TextStyle(color: Colors.white70)),
                     ],
                   ),
                 ),
                 Expanded(
                   child: ReorderableListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
                     itemCount: items.length,
                     onReorder: (o, n) {
                       ref
@@ -99,6 +95,8 @@ class PlaylistEditorScreen extends ConsumerWidget {
   }
 }
 
+// ─── Playlist Item Tile ───────────────────────────────────────────────────────
+
 class _PlaylistItemTile extends ConsumerWidget {
   final int index;
   final PlaylistItem item;
@@ -113,77 +111,409 @@ class _PlaylistItemTile extends ConsumerWidget {
       ContentType.menu => Icons.menu_book,
       ContentType.priceList => Icons.list_alt,
     };
-    final typeLabel = switch (item.type) {
-      ContentType.video => 'Video',
-      ContentType.image => 'Görsel',
-      ContentType.menu => 'Menü',
-      ContentType.priceList => 'Liste',
-    };
+
+    final hasSchedule = item.startMinutes != null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFF16213E),
         borderRadius: BorderRadius.circular(8),
+        border: hasSchedule
+            ? Border.all(color: const Color(0xFFE94560).withValues(alpha: 0.4))
+            : null,
       ),
-      child: Row(
+      child: Column(
         children: [
-          const Icon(Icons.drag_handle, color: Colors.white38),
-          const SizedBox(width: 8),
-          Icon(typeIcon, color: const Color(0xFFE94560), size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.contentRef.split('/').last,
-                  style: const TextStyle(color: Colors.white54, fontSize: 11),
-                ),
-                Text(typeLabel,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13)),
-              ],
-            ),
-          ),
-          SizedBox(
-            width: 72,
+          // ── Main row ──────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 4, 4),
             child: Row(
               children: [
+                const Icon(Icons.drag_handle, color: Colors.white38),
+                const SizedBox(width: 8),
+                Icon(typeIcon, color: const Color(0xFFE94560), size: 20),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: TextFormField(
-                    initialValue: item.durationSeconds.toString(),
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 14),
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    onChanged: (v) {
-                      final secs = int.tryParse(v);
-                      if (secs != null && secs > 0) {
-                        ref
-                            .read(playlistEditorProvider.notifier)
-                            .updateDuration(index, secs);
-                      }
-                    },
+                  child: Text(
+                    item.contentRef.split('/').last,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Text('s', style: TextStyle(color: Colors.white54)),
+                // Duration field
+                SizedBox(
+                  width: 64,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: item.durationSeconds.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          onChanged: (v) {
+                            final s = int.tryParse(v);
+                            if (s != null && s > 0) {
+                              ref
+                                  .read(playlistEditorProvider.notifier)
+                                  .updateDuration(index, s);
+                            }
+                          },
+                        ),
+                      ),
+                      const Text('s', style: TextStyle(color: Colors.white54)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline,
+                      color: Color(0xFFE94560), size: 20),
+                  onPressed: () =>
+                      ref.read(playlistEditorProvider.notifier).removeAt(index),
+                ),
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Color(0xFFE94560)),
-            onPressed: () =>
-                ref.read(playlistEditorProvider.notifier).removeAt(index),
+          // ── Time range row ────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: GestureDetector(
+              onTap: () => _showTimePicker(context, ref),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: hasSchedule
+                      ? const Color(0xFFE94560).withValues(alpha: 0.15)
+                      : const Color(0xFF0F3460),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      hasSchedule ? Icons.schedule : Icons.all_inclusive,
+                      color: hasSchedule
+                          ? const Color(0xFFE94560)
+                          : Colors.white38,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      item.timeRangeLabel,
+                      style: TextStyle(
+                        color: hasSchedule
+                            ? const Color(0xFFE94560)
+                            : Colors.white38,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.edit, color: Colors.white24, size: 12),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showTimePicker(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(playlistEditorProvider.notifier);
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF16213E),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => _TimeRangeSheet(
+        item: item,
+        onSave: (start, end) => notifier.updateTimeRange(index, start, end),
+        onClear: () => notifier.clearTimeRange(index),
+      ),
+    );
+  }
+}
+
+// ─── Time Range Bottom Sheet ──────────────────────────────────────────────────
+
+class _TimeRangeSheet extends StatefulWidget {
+  final PlaylistItem item;
+  final void Function(int startMinutes, int endMinutes) onSave;
+  final VoidCallback onClear;
+
+  const _TimeRangeSheet({
+    required this.item,
+    required this.onSave,
+    required this.onClear,
+  });
+
+  @override
+  State<_TimeRangeSheet> createState() => _TimeRangeSheetState();
+}
+
+class _TimeRangeSheetState extends State<_TimeRangeSheet> {
+  late TimeOfDay _start;
+  late TimeOfDay _end;
+  bool _hasSchedule = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasSchedule = widget.item.startMinutes != null;
+    _start = widget.item.startMinutes != null
+        ? TimeOfDay(
+            hour: widget.item.startMinutes! ~/ 60,
+            minute: widget.item.startMinutes! % 60)
+        : const TimeOfDay(hour: 8, minute: 0);
+    _end = widget.item.endMinutes != null
+        ? TimeOfDay(
+            hour: widget.item.endMinutes! ~/ 60,
+            minute: widget.item.endMinutes! % 60)
+        : const TimeOfDay(hour: 17, minute: 0);
+  }
+
+  String _fmt(TimeOfDay t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  Future<void> _pickTime(bool isStart) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: isStart ? _start : _end,
+      builder: (ctx, child) => Theme(
+        data: ThemeData.dark().copyWith(
+          colorScheme: const ColorScheme.dark(
+            primary: Color(0xFFE94560),
+            surface: Color(0xFF16213E),
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _start = picked;
+        } else {
+          _end = picked;
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Yayın Zamanlaması',
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          // Toggle
+          Row(
+            children: [
+              Expanded(
+                child: _OptionTile(
+                  label: 'Her Zaman',
+                  icon: Icons.all_inclusive,
+                  selected: !_hasSchedule,
+                  onTap: () => setState(() => _hasSchedule = false),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _OptionTile(
+                  label: 'Belirli Saatler',
+                  icon: Icons.schedule,
+                  selected: _hasSchedule,
+                  onTap: () => setState(() => _hasSchedule = true),
+                ),
+              ),
+            ],
+          ),
+          // Time pickers (only when scheduled)
+          if (_hasSchedule) ...[
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _TimeTile(
+                    label: 'Başlangıç',
+                    time: _fmt(_start),
+                    onTap: () => _pickTime(true),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('–',
+                      style: TextStyle(color: Colors.white54, fontSize: 24)),
+                ),
+                Expanded(
+                  child: _TimeTile(
+                    label: 'Bitiş',
+                    time: _fmt(_end),
+                    onTap: () => _pickTime(false),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Midnight-crossing hint
+            if (_end.hour * 60 + _end.minute <=
+                _start.hour * 60 + _start.minute)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        color: Color(0xFFE94560), size: 14),
+                    SizedBox(width: 6),
+                    Text(
+                      'Gece yarısını geçiyor (ertesi güne kadar)',
+                      style: TextStyle(
+                          color: Color(0xFFE94560), fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_hasSchedule) {
+                  widget.onSave(
+                    _start.hour * 60 + _start.minute,
+                    _end.hour * 60 + _end.minute,
+                  );
+                } else {
+                  widget.onClear();
+                }
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE94560),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Kaydet',
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
+            ),
           ),
         ],
       ),
     );
   }
 }
+
+class _OptionTile extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _OptionTile({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: selected
+              ? const Color(0xFFE94560).withValues(alpha: 0.15)
+              : const Color(0xFF0F3460),
+          borderRadius: BorderRadius.circular(8),
+          border: selected
+              ? Border.all(color: const Color(0xFFE94560))
+              : null,
+        ),
+        child: Column(
+          children: [
+            Icon(icon,
+                color: selected ? const Color(0xFFE94560) : Colors.white38),
+            const SizedBox(height: 4),
+            Text(label,
+                style: TextStyle(
+                    color: selected
+                        ? const Color(0xFFE94560)
+                        : Colors.white54,
+                    fontSize: 13)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeTile extends StatelessWidget {
+  final String label;
+  final String time;
+  final VoidCallback onTap;
+
+  const _TimeTile({
+    required this.label,
+    required this.time,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F3460),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Text(label,
+                style: const TextStyle(color: Colors.white54, fontSize: 12)),
+            const SizedBox(height: 6),
+            Text(time,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    fontFeatures: [FontFeature.tabularFigures()])),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Content Picker Sheet ─────────────────────────────────────────────────────
 
 class _ContentPickerSheet extends ConsumerStatefulWidget {
   const _ContentPickerSheet();
@@ -257,10 +587,8 @@ class _ContentPickerSheetState extends ConsumerState<_ContentPickerSheet> {
                 controller: ctrl,
                 itemCount: list.length,
                 itemBuilder: (_, i) => ListTile(
-                  leading: Icon(
-                    _typeIcon(list[i].type),
-                    color: const Color(0xFFE94560),
-                  ),
+                  leading: Icon(_typeIcon(list[i].type),
+                      color: const Color(0xFFE94560)),
                   title: Text(list[i].title,
                       style: const TextStyle(color: Colors.white)),
                   onTap: () {

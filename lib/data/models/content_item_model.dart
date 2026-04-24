@@ -302,12 +302,40 @@ class PlaylistItem {
   final int durationSeconds;
   final String contentRef;
 
+  /// Minutes from midnight (0–1439). null = always active.
+  final int? startMinutes;
+  final int? endMinutes;
+
   const PlaylistItem({
     required this.id,
     required this.type,
     required this.durationSeconds,
     required this.contentRef,
+    this.startMinutes,
+    this.endMinutes,
   });
+
+  /// Returns true if this item should be shown at [time].
+  bool isActiveAt(DateTime time) {
+    if (startMinutes == null || endMinutes == null) return true;
+    final current = time.hour * 60 + time.minute;
+    if (startMinutes! <= endMinutes!) {
+      // Same-day range e.g. 11:00–17:00
+      return current >= startMinutes! && current < endMinutes!;
+    } else {
+      // Overnight range e.g. 22:00–02:00
+      return current >= startMinutes! || current < endMinutes!;
+    }
+  }
+
+  /// Human-readable label for the time range.
+  String get timeRangeLabel {
+    if (startMinutes == null || endMinutes == null) return 'Her Zaman';
+    return '${_fmtMinutes(startMinutes!)} – ${_fmtMinutes(endMinutes!)}';
+  }
+
+  static String _fmtMinutes(int m) =>
+      '${(m ~/ 60).toString().padLeft(2, '0')}:${(m % 60).toString().padLeft(2, '0')}';
 
   factory PlaylistItem.fromMap(Map<String, dynamic> map) {
     return PlaylistItem(
@@ -315,6 +343,8 @@ class PlaylistItem {
       type: contentTypeFromString(map['type'] as String),
       durationSeconds: (map['durationSeconds'] as num).toInt(),
       contentRef: map['contentRef'] as String,
+      startMinutes: (map['startMinutes'] as num?)?.toInt(),
+      endMinutes: (map['endMinutes'] as num?)?.toInt(),
     );
   }
 
@@ -323,14 +353,26 @@ class PlaylistItem {
         'type': contentTypeToString(type),
         'durationSeconds': durationSeconds,
         'contentRef': contentRef,
+        if (startMinutes != null) 'startMinutes': startMinutes,
+        if (endMinutes != null) 'endMinutes': endMinutes,
       };
 
-  PlaylistItem copyWith({int? durationSeconds}) {
+  PlaylistItem copyWith({
+    int? durationSeconds,
+    Object? startMinutes = _sentinel,
+    Object? endMinutes = _sentinel,
+  }) {
     return PlaylistItem(
       id: id,
       type: type,
       durationSeconds: durationSeconds ?? this.durationSeconds,
       contentRef: contentRef,
+      startMinutes:
+          startMinutes == _sentinel ? this.startMinutes : startMinutes as int?,
+      endMinutes:
+          endMinutes == _sentinel ? this.endMinutes : endMinutes as int?,
     );
   }
 }
+
+const _sentinel = Object();

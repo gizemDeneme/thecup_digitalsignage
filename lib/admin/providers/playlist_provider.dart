@@ -52,6 +52,24 @@ class PlaylistEditorNotifier extends StateNotifier<List<PlaylistItem>> {
     state = list;
   }
 
+  void updateTimeRange(int index, int? startMinutes, int? endMinutes) {
+    final list = [...state];
+    list[index] = list[index].copyWith(
+      startMinutes: startMinutes,
+      endMinutes: endMinutes,
+    );
+    state = list;
+  }
+
+  void clearTimeRange(int index) {
+    final list = [...state];
+    list[index] = list[index].copyWith(
+      startMinutes: null,
+      endMinutes: null,
+    );
+    state = list;
+  }
+
   void loadFromPlaylist(PlaylistModel playlist) {
     state = playlist.items;
   }
