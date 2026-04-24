@@ -39,6 +39,9 @@ dependencies:
   # Image compression
   image: ^4.2.0
 
+  # HTTP client with web multipart upload support
+  dio: ^5.7.0
+
   # Utilities
   get_it: ^8.0.3
   uuid: ^4.4.2
