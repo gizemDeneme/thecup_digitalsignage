@@ -5,5 +5,59 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|wasm)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      }
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "thecup-f2c71",
+          "appId": "1:1006409449033:android:9fccd930542b1e750d4998",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "thecup-f2c71",
+          "appId": "1:1006409449033:ios:2f190dd1be8dc56a0d4998",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "thecup-f2c71",
+          "configurations": {
+            "android": "1:1006409449033:android:9fccd930542b1e750d4998",
+            "ios": "1:1006409449033:ios:2f190dd1be8dc56a0d4998",
+            "web": "1:1006409449033:web:a19a6dddfa9661d20d4998"
+          }
+        }
+      }
+    }
   }
 }
