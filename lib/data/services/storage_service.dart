@@ -61,8 +61,15 @@ class StorageService {
     }
 
     final data = response.data as Map<String, dynamic>;
+    String downloadUrl = data['secure_url'] as String;
+
+    // Video URL'lerine .mp4 uzantısı ekle — Android ExoPlayer format tanıması için
+    if (resourceType == 'video' && !downloadUrl.contains('.mp4')) {
+      downloadUrl = '$downloadUrl.mp4';
+    }
+
     return StorageUploadResult(
-      downloadUrl: data['secure_url'] as String,
+      downloadUrl: downloadUrl,
       publicId: data['public_id'] as String,
       sizeBytes: (data['bytes'] as num).toInt(),
     );

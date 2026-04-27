@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 21
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -38,7 +38,7 @@ android {
             dimension = "app"
             applicationId = "com.thecup.tv"
             resValue("string", "app_name", "thecup Ekran")
-            minSdk = 21
+            minSdk = flutter.minSdkVersion
         }
     }
 

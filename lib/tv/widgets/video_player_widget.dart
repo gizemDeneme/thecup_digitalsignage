@@ -18,9 +18,17 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
   bool _initialized = false;
   bool _completed = false;
 
-  // Yükleme/oynatma için maksimum bekleme süresi — sonra bir sonraki içeriğe geç
-  static const _initTimeout = Duration(seconds: 30);
+  static const _initTimeout = Duration(seconds: 60);
   static const _maxPlayDuration = Duration(minutes: 10);
+
+  /// Cloudinary URL'leri uzantısız gelebilir (ExoPlayer format tanıyamaz).
+  /// Sonuna .mp4 ekle — Cloudinary aynı dosyayı MP4 olarak servis eder.
+  static String _toMp4Url(String url) {
+    if (url.contains('.mp4') || url.contains('.m3u8') || url.contains('.webm')) {
+      return url;
+    }
+    return '$url.mp4';
+  }
 
   @override
   void initState() {
@@ -37,14 +45,13 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
     // Önce local cache'e bak
     final localFile = await cache.getCachedVideo(widget.item.id);
 
+    final videoUrl = _toMp4Url(widget.item.downloadUrl);
+
     VideoPlayerController ctrl;
     if (localFile != null) {
-      debugPrint('[Video] Local cache\'ten oynatılıyor: ${widget.item.id}');
       ctrl = VideoPlayerController.file(localFile);
     } else {
-      debugPrint('[Video] Network URL\'den oynatılıyor: ${widget.item.downloadUrl}');
-      ctrl = VideoPlayerController.networkUrl(
-          Uri.parse(widget.item.downloadUrl));
+      ctrl = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
     }
 
     try {
