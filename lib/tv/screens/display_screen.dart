@@ -67,16 +67,19 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
   }
 
   Widget _buildContent(PlaylistItem item) {
-    return FutureBuilder<ContentItemModel?>(
-      future: ref.read(firestoreServiceProvider).getContent(
-            item.contentRef.split('/').last,
-          ),
-      builder: (context, snap) {
-        if (!snap.hasData) {
+    final contentId = item.contentRef.split('/').last;
+    final contentAsync = ref.watch(contentItemProvider(contentId));
+
+    return contentAsync.when(
+      loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.white24)),
+      error: (_, __) => const Center(
+          child: Icon(Icons.broken_image, color: Colors.white24, size: 80)),
+      data: (content) {
+        if (content == null) {
           return const Center(
-              child: CircularProgressIndicator(color: Colors.white24));
+              child: Icon(Icons.broken_image, color: Colors.white24, size: 80));
         }
-        final content = snap.data!;
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
           child: switch (content) {
