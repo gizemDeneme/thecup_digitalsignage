@@ -36,62 +36,69 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
       body: Center(
-        child: Container(
-          width: 360,
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: const Color(0xFF16213E),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'thecup Admin',
-                style: TextStyle(
-                  color: Color(0xFFE94560),
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: const Color(0xFF16213E),
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _emailCtrl,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.emailAddress,
-                decoration: _inputDecoration('E-posta'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passCtrl,
-                style: const TextStyle(color: Colors.white),
-                obscureText: true,
-                decoration: _inputDecoration('Şifre'),
-                onSubmitted: (_) => _signIn(),
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: 12),
-                Text(_error!,
-                    style: const TextStyle(color: Color(0xFFE94560))),
-              ],
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _signIn,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE94560),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'thecup Admin',
+                    style: TextStyle(
+                      color: Color(0xFFE94560),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  child: _loading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Giriş Yap',
-                          style: TextStyle(fontSize: 16, color: Colors.white)),
-                ),
+                  const SizedBox(height: 32),
+                  TextField(
+                    controller: _emailCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: _inputDecoration('E-posta'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    obscureText: true,
+                    decoration: _inputDecoration('Şifre'),
+                    onSubmitted: (_) => _signIn(),
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 12),
+                    Text(_error!,
+                        style: const TextStyle(color: Color(0xFFE94560))),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _signIn,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE94560),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: _loading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Giriş Yap',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white)),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

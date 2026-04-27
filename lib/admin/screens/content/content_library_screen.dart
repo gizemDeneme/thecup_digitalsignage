@@ -100,21 +100,26 @@ class _ContentTab extends ConsumerWidget {
             const Center(child: CircularProgressIndicator(color: Color(0xFFE94560))),
         error: (e, _) => Center(
             child: Text(e.toString(), style: const TextStyle(color: Colors.white))),
-        data: (list) => list.isEmpty
-            ? const Center(
+        data: (list) {
+          if (list.isEmpty) {
+            return const Center(
                 child: Text('Henüz içerik yok',
-                    style: TextStyle(color: Colors.white54)))
-            : GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.85,
-                ),
-                itemCount: list.length,
-                itemBuilder: (_, i) => _ContentCard(item: list[i]),
-              ),
+                    style: TextStyle(color: Colors.white54)));
+          }
+          final w = MediaQuery.of(context).size.width;
+          final cols = w < 480 ? 1 : w < 900 ? 2 : 3;
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: cols,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: list.length,
+            itemBuilder: (_, i) => _ContentCard(item: list[i]),
+          );
+        },
       ),
     );
   }

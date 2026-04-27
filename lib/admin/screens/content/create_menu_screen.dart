@@ -372,43 +372,87 @@ class _ItemRowState extends State<_ItemRow> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 500;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: TextField(
-              controller: _name,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-              decoration: _dec('Ürün adı'),
-              onChanged: (_) => _notify(),
+      child: isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _name,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: _dec('Ürün adı'),
+                        onChanged: (_) => _notify(),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white38, size: 16),
+                      onPressed: widget.onRemove,
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _desc,
+                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        decoration: _dec('Açıklama'),
+                        onChanged: (_) => _notify(),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 80,
+                      child: TextField(
+                        controller: _price,
+                        style: const TextStyle(color: Color(0xFFE94560), fontSize: 13),
+                        decoration: _dec('Fiyat'),
+                        onChanged: (_) => _notify(),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _name,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: _dec('Ürün adı'),
+                    onChanged: (_) => _notify(),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _desc,
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    decoration: _dec('Açıklama'),
+                    onChanged: (_) => _notify(),
+                  ),
+                ),
+                SizedBox(
+                  width: 70,
+                  child: TextField(
+                    controller: _price,
+                    style: const TextStyle(color: Color(0xFFE94560), fontSize: 13),
+                    decoration: _dec('Fiyat'),
+                    onChanged: (_) => _notify(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white38, size: 16),
+                  onPressed: widget.onRemove,
+                ),
+              ],
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: TextField(
-              controller: _desc,
-              style: const TextStyle(color: Colors.white54, fontSize: 12),
-              decoration: _dec('Açıklama'),
-              onChanged: (_) => _notify(),
-            ),
-          ),
-          SizedBox(
-            width: 70,
-            child: TextField(
-              controller: _price,
-              style: const TextStyle(color: Color(0xFFE94560), fontSize: 13),
-              decoration: _dec('Fiyat'),
-              onChanged: (_) => _notify(),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white38, size: 16),
-            onPressed: widget.onRemove,
-          ),
-        ],
-      ),
     );
   }
 

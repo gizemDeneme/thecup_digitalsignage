@@ -57,9 +57,16 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
         title: const Text('Görsel Yükle', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            24, 24, 24,
+            MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+            child: IntrinsicHeight(
+              child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
@@ -166,6 +173,9 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
               ),
             ),
           ],
+        ),
+            ),
+          ),
         ),
       ),
     );
