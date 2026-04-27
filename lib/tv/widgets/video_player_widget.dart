@@ -16,6 +16,11 @@ class VideoPlayerWidget extends ConsumerStatefulWidget {
 class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
   VideoPlayerController? _controller;
   bool _initialized = false;
+  bool _completed = false;
+
+  // Yükleme/oynatma için maksimum bekleme süresi — sonra bir sonraki içeriğe geç
+  static const _initTimeout = Duration(seconds: 30);
+  static const _maxPlayDuration = Duration(minutes: 10);
 
   @override
   void initState() {
@@ -26,21 +31,32 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
   Future<void> _initPlayer() async {
     final cache = ref.read(cacheServiceProvider);
 
-    // Download for future use (non-blocking)
+    // Arka planda indir (non-blocking)
     cache.downloadVideo(widget.item.id, widget.item.downloadUrl);
 
-    // Try local cache first
+    // Önce local cache'e bak
     final localFile = await cache.getCachedVideo(widget.item.id);
 
     VideoPlayerController ctrl;
     if (localFile != null) {
+      debugPrint('[Video] Local cache\'ten oynatılıyor: ${widget.item.id}');
       ctrl = VideoPlayerController.file(localFile);
     } else {
+      debugPrint('[Video] Network URL\'den oynatılıyor: ${widget.item.downloadUrl}');
       ctrl = VideoPlayerController.networkUrl(
           Uri.parse(widget.item.downloadUrl));
     }
 
-    await ctrl.initialize();
+    try {
+      // 30 saniyede initialize olmasa bir sonraki içeriğe geç
+      await ctrl.initialize().timeout(_initTimeout);
+    } catch (e) {
+      debugPrint('[Video] Initialize hatası/timeout: $e');
+      ctrl.dispose();
+      if (mounted) _goNext();
+      return;
+    }
+
     ctrl.addListener(_onPlayerUpdate);
     ctrl.setLooping(false);
 
@@ -50,6 +66,19 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
         _initialized = true;
       });
       ctrl.play();
+      debugPrint('[Video] Oynatma başladı, süre: ${ctrl.value.duration}');
+
+      // Güvenlik zamanlayıcısı: video süresinden 5 sn sonra geç
+      // (onPlayerUpdate tetiklenmediği durumlar için)
+      final safeDuration = ctrl.value.duration > Duration.zero
+          ? ctrl.value.duration + const Duration(seconds: 5)
+          : _maxPlayDuration;
+      Future.delayed(safeDuration, () {
+        if (mounted && !_completed) {
+          debugPrint('[Video] Güvenlik zamanlayıcısı tetiklendi');
+          _goNext();
+        }
+      });
     } else {
       ctrl.dispose();
     }
@@ -57,12 +86,19 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
 
   void _onPlayerUpdate() {
     final ctrl = _controller;
-    if (ctrl == null) return;
+    if (ctrl == null || _completed) return;
     if (ctrl.value.position >= ctrl.value.duration &&
         ctrl.value.duration > Duration.zero &&
         !ctrl.value.isPlaying) {
-      ref.read(playlistControllerProvider.notifier).onVideoCompleted();
+      debugPrint('[Video] Tamamlandı, sonraki içeriğe geçiliyor');
+      _goNext();
     }
+  }
+
+  void _goNext() {
+    if (_completed) return;
+    _completed = true;
+    ref.read(playlistControllerProvider.notifier).onVideoCompleted();
   }
 
   @override

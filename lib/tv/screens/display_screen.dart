@@ -22,10 +22,8 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
   }
 
   Future<void> _bootstrap() async {
-    // Load from cache immediately for instant display
     ref.read(playlistControllerProvider.notifier).loadFromCache();
 
-    // Start listening to Firestore with timeout fallback
     ref.listenManual(
       playlistStreamProvider,
       (_, next) {
