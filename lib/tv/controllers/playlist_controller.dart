@@ -168,7 +168,7 @@ final playlistControllerProvider =
 /// Content item yükleyici — her contentId için ayrı cache tutar,
 /// rebuild'lerde yeniden Firestore isteği atmaz.
 final contentItemProvider =
-    FutureProvider.autoDispose.family<ContentItemModel?, String>(
+    FutureProvider.family<ContentItemModel?, String>(
   (ref, contentId) =>
       ref.read(firestoreServiceProvider).getContent(contentId),
 );

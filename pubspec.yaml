@@ -43,6 +43,7 @@ dependencies:
   dio: ^5.7.0
 
   # Utilities
+  wakelock_plus: ^1.1.0
   get_it: ^8.0.3
   uuid: ^4.4.2
   path_provider: ^2.1.4
