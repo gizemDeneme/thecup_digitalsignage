@@ -10,7 +10,8 @@ service cloud.firestore {
     function isSuperAdmin() {
       return request.auth != null &&
              exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin';
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin' &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
     }
 
     function isActiveAdmin() {
@@ -19,22 +20,22 @@ service cloud.firestore {
              get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
     }
 
-    // TV app reads without auth; only admin can write
+    // TV app reads without auth; only active admin can write
     match /playlists/{doc} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isActiveAdmin();
     }
 
-    // TV app reads content; only admin can write
+    // TV app reads content; only active admin can write
     match /content/{doc} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isActiveAdmin();
     }
 
-    // Admin records: any admin can read; only super_admin can write.
+    // Admin records: any active admin can read; only active super_admin can write.
     // A user can update their own lastLoginAt field.
     match /admins/{uid} {
-      allow read: if isAdmin();
+      allow read: if isActiveAdmin();
       allow create, delete: if isSuperAdmin();
       allow update: if isSuperAdmin()
         || (request.auth != null && request.auth.uid == uid
@@ -42,10 +43,10 @@ service cloud.firestore {
                  .hasOnly(['lastLoginAt']));
     }
 
-    // Audit logs: append-only. Any admin can read & create; nobody updates/deletes.
+    // Audit logs: append-only. Any active admin can read & create; nobody updates/deletes.
     match /audit_logs/{doc} {
-      allow read: if isAdmin();
-      allow create: if isAdmin()
+      allow read: if isActiveAdmin();
+      allow create: if isActiveAdmin()
         && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false;
     }
