@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/menu_item_model.dart';
@@ -93,17 +94,17 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.paper,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF16213E),
-        title: const Text('Menü Oluştur', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.paper2,
+        title: const Text('Menü Oluştur', style: TextStyle(color: AppColors.ink)),
+        iconTheme: const IconThemeData(color: AppColors.ink),
         actions: [
           TextButton(
             onPressed: _save,
             child: const Text('Kaydet',
                 style: TextStyle(
-                    color: Color(0xFFE94560), fontWeight: FontWeight.bold)),
+                    color: AppColors.kraft, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -134,11 +135,11 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: _addCategory,
-            icon: const Icon(Icons.add, color: Color(0xFFE94560)),
+            icon: const Icon(Icons.add, color: AppColors.kraft),
             label: const Text('Kategori Ekle',
-                style: TextStyle(color: Color(0xFFE94560))),
+                style: TextStyle(color: AppColors.kraft)),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFFE94560)),
+              side: const BorderSide(color: AppColors.kraft),
             ),
           ),
         ],
@@ -148,12 +149,12 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
 
   Widget _field(TextEditingController ctrl, String label) => TextField(
         controller: ctrl,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: AppColors.ink),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.white54),
+          labelStyle: const TextStyle(color: AppColors.muted),
           filled: true,
-          fillColor: const Color(0xFF0F3460),
+          fillColor: AppColors.paper2,
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none),
@@ -166,7 +167,7 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F3460),
+          color: AppColors.paper2,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -182,7 +183,7 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
             const SizedBox(width: 8),
             Expanded(
                 child: Text(label,
-                    style: const TextStyle(color: Colors.white70))),
+                    style: const TextStyle(color: AppColors.ink2))),
           ],
         ),
       ),
@@ -198,7 +199,7 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
     ];
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: AppColors.paper2,
       builder: (_) => Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -207,7 +208,7 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
           children: [
             Text(label,
                 style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                    color: AppColors.ink, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
@@ -226,7 +227,7 @@ class _CreateMenuScreenState extends ConsumerState<CreateMenuScreen> {
                             borderRadius: BorderRadius.circular(8),
                             border: hex == current
                                 ? Border.all(
-                                    color: const Color(0xFFE94560), width: 2)
+                                    color: AppColors.kraft, width: 2)
                                 : null,
                           ),
                         ),
@@ -277,7 +278,7 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF16213E),
+      color: AppColors.paper2,
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -290,22 +291,22 @@ class _CategoryCard extends StatelessWidget {
                   child: TextFormField(
                     initialValue: category.name,
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
+                        color: AppColors.ink, fontWeight: FontWeight.bold),
                     decoration: const InputDecoration(
                       hintText: 'Kategori adı',
-                      hintStyle: TextStyle(color: Colors.white38),
+                      hintStyle: TextStyle(color: AppColors.muted),
                       border: InputBorder.none,
                     ),
                     onChanged: onNameChanged,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete, color: Color(0xFFE94560)),
+                  icon: const Icon(Icons.delete, color: AppColors.kraft),
                   onPressed: onRemove,
                 ),
               ],
             ),
-            const Divider(color: Colors.white24),
+            Divider(color: AppColors.line.withValues(alpha: 0.2)),
             ...category.items.asMap().entries.map((e) => _ItemRow(
                   index: e.key,
                   entry: e.value,
@@ -314,9 +315,9 @@ class _CategoryCard extends StatelessWidget {
                 )),
             TextButton.icon(
               onPressed: onAddItem,
-              icon: const Icon(Icons.add, color: Colors.white54, size: 16),
+              icon: const Icon(Icons.add, color: AppColors.muted, size: 16),
               label: const Text('Ürün Ekle',
-                  style: TextStyle(color: Colors.white54)),
+                  style: TextStyle(color: AppColors.muted)),
             ),
           ],
         ),
@@ -365,7 +366,7 @@ class _ItemRowState extends State<_ItemRow> {
 
   InputDecoration _dec(String h) => InputDecoration(
         hintText: h,
-        hintStyle: const TextStyle(color: Colors.white24),
+        hintStyle: TextStyle(color: AppColors.line.withValues(alpha: 0.2)),
         border: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(vertical: 4),
       );
@@ -384,13 +385,13 @@ class _ItemRowState extends State<_ItemRow> {
                     Expanded(
                       child: TextField(
                         controller: _name,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        style: const TextStyle(color: AppColors.ink, fontSize: 13),
                         decoration: _dec('Ürün adı'),
                         onChanged: (_) => _notify(),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white38, size: 16),
+                      icon: const Icon(Icons.close, color: AppColors.muted, size: 16),
                       onPressed: widget.onRemove,
                     ),
                   ],
@@ -400,7 +401,7 @@ class _ItemRowState extends State<_ItemRow> {
                     Expanded(
                       child: TextField(
                         controller: _desc,
-                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        style: const TextStyle(color: AppColors.muted, fontSize: 12),
                         decoration: _dec('Açıklama'),
                         onChanged: (_) => _notify(),
                       ),
@@ -409,7 +410,7 @@ class _ItemRowState extends State<_ItemRow> {
                       width: 80,
                       child: TextField(
                         controller: _price,
-                        style: const TextStyle(color: Color(0xFFE94560), fontSize: 13),
+                        style: const TextStyle(color: AppColors.kraft, fontSize: 13),
                         decoration: _dec('Fiyat'),
                         onChanged: (_) => _notify(),
                       ),
@@ -424,7 +425,7 @@ class _ItemRowState extends State<_ItemRow> {
                   flex: 3,
                   child: TextField(
                     controller: _name,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.ink, fontSize: 13),
                     decoration: _dec('Ürün adı'),
                     onChanged: (_) => _notify(),
                   ),
@@ -433,7 +434,7 @@ class _ItemRowState extends State<_ItemRow> {
                   flex: 2,
                   child: TextField(
                     controller: _desc,
-                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    style: const TextStyle(color: AppColors.muted, fontSize: 12),
                     decoration: _dec('Açıklama'),
                     onChanged: (_) => _notify(),
                   ),
@@ -442,13 +443,13 @@ class _ItemRowState extends State<_ItemRow> {
                   width: 70,
                   child: TextField(
                     controller: _price,
-                    style: const TextStyle(color: Color(0xFFE94560), fontSize: 13),
+                    style: const TextStyle(color: AppColors.kraft, fontSize: 13),
                     decoration: _dec('Fiyat'),
                     onChanged: (_) => _notify(),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white38, size: 16),
+                  icon: const Icon(Icons.close, color: AppColors.muted, size: 16),
                   onPressed: widget.onRemove,
                 ),
               ],

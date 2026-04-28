@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/playlist_provider.dart';
+import '../../providers/audit_provider.dart';
+import '../../../data/models/audit_log_model.dart';
 
 class PublishScreen extends ConsumerWidget {
   const PublishScreen({super.key});
@@ -13,11 +16,11 @@ class PublishScreen extends ConsumerWidget {
     final secs = totalSecs % 60;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.paper,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF16213E),
-        title: const Text('Yayınla', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.paper2,
+        title: const Text('Yayınla', style: TextStyle(color: AppColors.ink)),
+        iconTheme: const IconThemeData(color: AppColors.ink),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -27,7 +30,7 @@ class PublishScreen extends ConsumerWidget {
             const Text(
               'Yayın Özeti',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.ink,
                   fontSize: 22,
                   fontWeight: FontWeight.bold),
             ),
@@ -39,17 +42,17 @@ class PublishScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF16213E),
+                color: AppColors.paper2,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.info_outline, color: Color(0xFFE94560)),
+                  Icon(Icons.info_outline, color: AppColors.kraft),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Yayınlandıktan sonra tüm ekranlara 1-2 saniye içinde iletilir.',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: AppColors.ink2),
                     ),
                   ),
                 ],
@@ -62,13 +65,13 @@ class PublishScreen extends ConsumerWidget {
               child: ElevatedButton.icon(
                 onPressed: () => _publish(context, ref),
                 icon: const Icon(Icons.broadcast_on_personal,
-                    color: Colors.white),
+                    color: AppColors.ink),
                 label: const Text(
                   'Tüm Ekranlara Yayınla',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: AppColors.ink),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE94560),
+                  backgroundColor: AppColors.kraft,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
@@ -85,13 +88,13 @@ class PublishScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFFE94560), size: 22),
+          Icon(icon, color: AppColors.kraft, size: 22),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(color: Colors.white70)),
+          Text(label, style: const TextStyle(color: AppColors.ink2)),
           const Spacer(),
           Text(value,
               style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold)),
+                  color: AppColors.ink, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -102,13 +105,21 @@ class PublishScreen extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFFE94560)),
+        child: CircularProgressIndicator(color: AppColors.kraft),
       ),
     );
 
     try {
       final items = ref.read(playlistEditorProvider);
       await ref.read(playlistRepositoryProvider).publish(items);
+      await ref.read(auditServiceProvider).log(
+            AuditAction.playlistPublish,
+            metadata: {
+              'itemCount': items.length,
+              'totalSeconds':
+                  items.fold<int>(0, (a, b) => a + b.durationSeconds),
+            },
+          );
       if (context.mounted) {
         Navigator.of(context).pop(); // close dialog
         ScaffoldMessenger.of(context).showSnackBar(
@@ -125,7 +136,7 @@ class PublishScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Hata: $e'),
-            backgroundColor: const Color(0xFFE94560),
+            backgroundColor: AppColors.kraft,
           ),
         );
       }

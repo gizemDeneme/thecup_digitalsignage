@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
@@ -51,11 +52,11 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(uploadNotifierProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.paper,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF16213E),
-        title: const Text('Görsel Yükle', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.paper2,
+        title: const Text('Görsel Yükle', style: TextStyle(color: AppColors.ink)),
+        iconTheme: const IconThemeData(color: AppColors.ink),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) => SingleChildScrollView(
@@ -71,7 +72,7 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
           children: [
             TextField(
               controller: _titleCtrl,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.ink),
               decoration: _inputDecoration('Başlık'),
             ),
             const SizedBox(height: 24),
@@ -81,9 +82,9 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F3460),
+                  color: AppColors.paper2,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE94560), width: 1.5),
+                  border: Border.all(color: AppColors.kraft, width: 1.5),
                   image: _fileBytes != null
                       ? DecorationImage(
                           image: MemoryImage(_fileBytes!),
@@ -97,10 +98,10 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.image,
-                                color: Color(0xFFE94560), size: 48),
+                                color: AppColors.kraft, size: 48),
                             SizedBox(height: 8),
                             Text('Görsel dosyası seç',
-                                style: TextStyle(color: Colors.white70)),
+                                style: TextStyle(color: AppColors.ink2)),
                           ],
                         ),
                       )
@@ -111,8 +112,8 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
               const SizedBox(height: 24),
               LinearProgressIndicator(
                 value: state.isCompressing ? null : (state.progress > 0 ? state.progress : null),
-                backgroundColor: const Color(0xFF0F3460),
-                color: const Color(0xFFE94560),
+                backgroundColor: AppColors.paper2,
+                color: AppColors.kraft,
               ),
               const SizedBox(height: 8),
               Text(
@@ -121,7 +122,7 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
                     : state.progress > 0
                         ? '${(state.progress * 100).toStringAsFixed(0)}% yükleniyor...'
                         : 'Başlatılıyor...',
-                style: const TextStyle(color: Colors.white54),
+                style: const TextStyle(color: AppColors.muted),
               ),
             ],
             if (state.error != null) ...[
@@ -129,18 +130,18 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE94560).withValues(alpha: 0.15),
+                  color: AppColors.kraft.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
                     const Icon(Icons.error_outline,
-                        color: Color(0xFFE94560), size: 18),
+                        color: AppColors.kraft, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(state.error!,
                           style: const TextStyle(
-                              color: Color(0xFFE94560), fontSize: 13)),
+                              color: AppColors.kraft, fontSize: 13)),
                     ),
                   ],
                 ),
@@ -155,9 +156,9 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
                     ? _upload
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE94560),
+                  backgroundColor: AppColors.kraft,
                   disabledBackgroundColor:
-                      const Color(0xFFE94560).withValues(alpha: 0.4),
+                      AppColors.kraft.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
@@ -166,10 +167,10 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2),
+                            color: AppColors.ink, strokeWidth: 2),
                       )
                     : const Text('Yükle',
-                        style: TextStyle(fontSize: 16, color: Colors.white)),
+                        style: TextStyle(fontSize: 16, color: AppColors.ink)),
               ),
             ),
           ],
@@ -183,9 +184,9 @@ class _UploadImageScreenState extends ConsumerState<UploadImageScreen> {
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white54),
+        labelStyle: const TextStyle(color: AppColors.muted),
         filled: true,
-        fillColor: const Color(0xFF0F3460),
+        fillColor: AppColors.paper2,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,

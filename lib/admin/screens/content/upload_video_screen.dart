@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
@@ -51,11 +52,11 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(uploadNotifierProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.paper,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF16213E),
-        title: const Text('Video Yükle', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.paper2,
+        title: const Text('Video Yükle', style: TextStyle(color: AppColors.ink)),
+        iconTheme: const IconThemeData(color: AppColors.ink),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) => SingleChildScrollView(
@@ -71,7 +72,7 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
           children: [
             TextField(
               controller: _titleCtrl,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.ink),
               decoration: _inputDecoration('Başlık'),
             ),
             const SizedBox(height: 24),
@@ -81,9 +82,9 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
                 width: double.infinity,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F3460),
+                  color: AppColors.paper2,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE94560), width: 1.5),
+                  border: Border.all(color: AppColors.kraft, width: 1.5),
                 ),
                 child: Center(
                   child: Column(
@@ -93,13 +94,13 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
                         _fileBytes != null ? Icons.check_circle : Icons.videocam,
                         color: _fileBytes != null
                             ? Colors.greenAccent
-                            : const Color(0xFFE94560),
+                            : AppColors.kraft,
                         size: 48,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         _fileName ?? 'Video dosyası seç',
-                        style: const TextStyle(color: Colors.white70),
+                        style: const TextStyle(color: AppColors.ink2),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -107,7 +108,7 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
                       if (_fileBytes != null)
                         Text(
                           '${(_fileSize / 1024 / 1024).toStringAsFixed(1)} MB',
-                          style: const TextStyle(color: Colors.white38, fontSize: 12),
+                          style: const TextStyle(color: AppColors.muted, fontSize: 12),
                         ),
                     ],
                   ),
@@ -118,15 +119,15 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
               const SizedBox(height: 24),
               LinearProgressIndicator(
                 value: state.progress > 0 ? state.progress : null,
-                backgroundColor: const Color(0xFF0F3460),
-                color: const Color(0xFFE94560),
+                backgroundColor: AppColors.paper2,
+                color: AppColors.kraft,
               ),
               const SizedBox(height: 8),
               Text(
                 state.progress > 0
                     ? '${(state.progress * 100).toStringAsFixed(0)}% yükleniyor...'
                     : 'Hazırlanıyor...',
-                style: const TextStyle(color: Colors.white54),
+                style: const TextStyle(color: AppColors.muted),
               ),
             ],
             if (state.error != null) ...[
@@ -134,18 +135,18 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE94560).withValues(alpha: 0.15),
+                  color: AppColors.kraft.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
                     const Icon(Icons.error_outline,
-                        color: Color(0xFFE94560), size: 18),
+                        color: AppColors.kraft, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(state.error!,
                           style: const TextStyle(
-                              color: Color(0xFFE94560), fontSize: 13)),
+                              color: AppColors.kraft, fontSize: 13)),
                     ),
                   ],
                 ),
@@ -160,8 +161,8 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
                     ? _upload
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE94560),
-                  disabledBackgroundColor: const Color(0xFFE94560).withValues(alpha: 0.4),
+                  backgroundColor: AppColors.kraft,
+                  disabledBackgroundColor: AppColors.kraft.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
@@ -170,10 +171,10 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2),
+                            color: AppColors.ink, strokeWidth: 2),
                       )
                     : const Text('Yükle',
-                        style: TextStyle(fontSize: 16, color: Colors.white)),
+                        style: TextStyle(fontSize: 16, color: AppColors.ink)),
               ),
             ),
           ],
@@ -187,9 +188,9 @@ class _UploadVideoScreenState extends ConsumerState<UploadVideoScreen> {
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white54),
+        labelStyle: const TextStyle(color: AppColors.muted),
         filled: true,
-        fillColor: const Color(0xFF0F3460),
+        fillColor: AppColors.paper2,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,

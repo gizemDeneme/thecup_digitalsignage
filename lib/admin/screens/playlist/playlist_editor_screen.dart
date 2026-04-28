@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/content_item_model.dart';
 import '../../providers/content_provider.dart';
@@ -17,15 +18,15 @@ class PlaylistEditorScreen extends ConsumerWidget {
     final secs = totalSecs % 60;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.paper,
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
             heroTag: 'add_content',
             onPressed: () => _showContentPicker(context, ref),
-            backgroundColor: const Color(0xFF0F3460),
-            child: const Icon(Icons.add, color: Colors.white),
+            backgroundColor: AppColors.paper2,
+            child: const Icon(Icons.add, color: AppColors.ink),
           ),
           const SizedBox(height: 12),
           FloatingActionButton.extended(
@@ -36,9 +37,9 @@ class PlaylistEditorScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const PublishScreen()),
                     ),
-            backgroundColor: const Color(0xFFE94560),
-            icon: const Icon(Icons.broadcast_on_personal, color: Colors.white),
-            label: const Text('Yayınla', style: TextStyle(color: Colors.white)),
+            backgroundColor: AppColors.kraft,
+            icon: const Icon(Icons.broadcast_on_personal, color: AppColors.ink),
+            label: const Text('Yayınla', style: TextStyle(color: AppColors.ink)),
           ),
         ],
       ),
@@ -46,7 +47,7 @@ class PlaylistEditorScreen extends ConsumerWidget {
           ? const Center(
               child: Text(
                 'Playlist boş.\n+ ile içerik ekleyin.',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(color: AppColors.muted),
                 textAlign: TextAlign.center,
               ),
             )
@@ -58,9 +59,9 @@ class PlaylistEditorScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('${items.length} içerik',
-                          style: const TextStyle(color: Colors.white70)),
+                          style: const TextStyle(color: AppColors.ink2)),
                       Text('Toplam: ${mins}d ${secs}s',
-                          style: const TextStyle(color: Colors.white70)),
+                          style: const TextStyle(color: AppColors.ink2)),
                     ],
                   ),
                 ),
@@ -89,7 +90,7 @@ class PlaylistEditorScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: AppColors.paper2,
       builder: (_) => const _ContentPickerSheet(),
     );
   }
@@ -120,10 +121,10 @@ class _PlaylistItemTile extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF16213E),
+        color: AppColors.paper2,
         borderRadius: BorderRadius.circular(8),
         border: hasSchedule
-            ? Border.all(color: const Color(0xFFE94560).withValues(alpha: 0.4))
+            ? Border.all(color: AppColors.kraft.withValues(alpha: 0.4))
             : null,
       ),
       child: Column(
@@ -135,14 +136,14 @@ class _PlaylistItemTile extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(8, 8, 4, 4),
             child: Row(
               children: [
-                const Icon(Icons.drag_handle, color: Colors.white38),
+                const Icon(Icons.drag_handle, color: AppColors.muted),
                 const SizedBox(width: 8),
-                Icon(typeIcon, color: const Color(0xFFE94560), size: 20),
+                Icon(typeIcon, color: AppColors.kraft, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     displayTitle,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    style: const TextStyle(color: AppColors.ink2, fontSize: 13),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -154,7 +155,7 @@ class _PlaylistItemTile extends ConsumerWidget {
                       Expanded(
                         child: TextFormField(
                           initialValue: item.durationSeconds.toString(),
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(color: AppColors.ink, fontSize: 14),
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
                             border: InputBorder.none,
@@ -170,13 +171,13 @@ class _PlaylistItemTile extends ConsumerWidget {
                           },
                         ),
                       ),
-                      const Text('s', style: TextStyle(color: Colors.white54)),
+                      const Text('s', style: TextStyle(color: AppColors.muted)),
                     ],
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline,
-                      color: Color(0xFFE94560), size: 20),
+                      color: AppColors.kraft, size: 20),
                   onPressed: () =>
                       ref.read(playlistEditorProvider.notifier).removeAt(index),
                 ),
@@ -191,13 +192,13 @@ class _PlaylistItemTile extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: hasSchedule
-                    ? const Color(0xFFE94560).withValues(alpha: 0.15)
-                    : const Color(0xFF0F3460),
+                    ? AppColors.kraft.withValues(alpha: 0.15)
+                    : AppColors.paper2,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
                   color: hasSchedule
-                      ? const Color(0xFFE94560)
-                      : Colors.white24,
+                      ? AppColors.kraft
+                      : AppColors.line.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -210,8 +211,8 @@ class _PlaylistItemTile extends ConsumerWidget {
                       Icon(
                         hasSchedule ? Icons.schedule : Icons.all_inclusive,
                         color: hasSchedule
-                            ? const Color(0xFFE94560)
-                            : Colors.white70,
+                            ? AppColors.kraft
+                            : AppColors.ink2,
                         size: 14,
                       ),
                       const SizedBox(width: 6),
@@ -219,14 +220,14 @@ class _PlaylistItemTile extends ConsumerWidget {
                         item.timeRangeLabel,
                         style: TextStyle(
                           color: hasSchedule
-                              ? const Color(0xFFE94560)
-                              : Colors.white70,
+                              ? AppColors.kraft
+                              : AppColors.ink2,
                           fontSize: 13,
                         ),
                       ),
                     ],
                   ),
-                  const Icon(Icons.edit, color: Colors.white38, size: 14),
+                  const Icon(Icons.edit, color: AppColors.muted, size: 14),
                 ],
               ),
             ),
@@ -241,7 +242,7 @@ class _PlaylistItemTile extends ConsumerWidget {
 
     await showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: AppColors.paper2,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -303,8 +304,8 @@ class _TimeRangeSheetState extends State<_TimeRangeSheet> {
       builder: (ctx, child) => Theme(
         data: ThemeData.dark().copyWith(
           colorScheme: const ColorScheme.dark(
-            primary: Color(0xFFE94560),
-            surface: Color(0xFF16213E),
+            primary: AppColors.kraft,
+            surface: AppColors.paper2,
           ),
         ),
         child: child!,
@@ -337,7 +338,7 @@ class _TimeRangeSheetState extends State<_TimeRangeSheet> {
           const Text(
             'Yayın Zamanlaması',
             style: TextStyle(
-                color: Colors.white,
+                color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.bold),
           ),
@@ -379,7 +380,7 @@ class _TimeRangeSheetState extends State<_TimeRangeSheet> {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
                   child: Text('–',
-                      style: TextStyle(color: Colors.white54, fontSize: 24)),
+                      style: TextStyle(color: AppColors.muted, fontSize: 24)),
                 ),
                 Expanded(
                   child: _TimeTile(
@@ -399,12 +400,12 @@ class _TimeRangeSheetState extends State<_TimeRangeSheet> {
                 child: Row(
                   children: [
                     Icon(Icons.info_outline,
-                        color: Color(0xFFE94560), size: 14),
+                        color: AppColors.kraft, size: 14),
                     SizedBox(width: 6),
                     Text(
                       'Gece yarısını geçiyor (ertesi güne kadar)',
                       style: TextStyle(
-                          color: Color(0xFFE94560), fontSize: 12),
+                          color: AppColors.kraft, fontSize: 12),
                     ),
                   ],
                 ),
@@ -427,12 +428,12 @@ class _TimeRangeSheetState extends State<_TimeRangeSheet> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE94560),
+                backgroundColor: AppColors.kraft,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('Kaydet',
-                  style: TextStyle(fontSize: 16, color: Colors.white)),
+                  style: TextStyle(fontSize: 16, color: AppColors.ink)),
             ),
           ),
         ],
@@ -462,23 +463,23 @@ class _OptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFFE94560).withValues(alpha: 0.15)
-              : const Color(0xFF0F3460),
+              ? AppColors.kraft.withValues(alpha: 0.15)
+              : AppColors.paper2,
           borderRadius: BorderRadius.circular(8),
           border: selected
-              ? Border.all(color: const Color(0xFFE94560))
+              ? Border.all(color: AppColors.kraft)
               : null,
         ),
         child: Column(
           children: [
             Icon(icon,
-                color: selected ? const Color(0xFFE94560) : Colors.white38),
+                color: selected ? AppColors.kraft : AppColors.muted),
             const SizedBox(height: 4),
             Text(label,
                 style: TextStyle(
                     color: selected
-                        ? const Color(0xFFE94560)
-                        : Colors.white54,
+                        ? AppColors.kraft
+                        : AppColors.muted,
                     fontSize: 13)),
           ],
         ),
@@ -505,17 +506,17 @@ class _TimeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F3460),
+          color: AppColors.paper2,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           children: [
             Text(label,
-                style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                style: const TextStyle(color: AppColors.muted, fontSize: 12)),
             const SizedBox(height: 6),
             Text(time,
                 style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.ink,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     fontFeatures: [FontFeature.tabularFigures()])),
@@ -555,7 +556,7 @@ class _ContentPickerSheetState extends ConsumerState<_ContentPickerSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white24,
+              color: AppColors.line.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -577,11 +578,11 @@ class _ContentPickerSheetState extends ConsumerState<_ContentPickerSheet> {
                           selected: _selectedType == t,
                           onSelected: (_) =>
                               setState(() => _selectedType = t),
-                          selectedColor: const Color(0xFFE94560),
+                          selectedColor: AppColors.kraft,
                           labelStyle: TextStyle(
                               color: _selectedType == t
                                   ? Colors.white
-                                  : Colors.white70),
+                                  : AppColors.ink2),
                         ),
                       ))
                   .toList(),
@@ -592,18 +593,18 @@ class _ContentPickerSheetState extends ConsumerState<_ContentPickerSheet> {
             child: items.when(
               loading: () => const Center(
                   child: CircularProgressIndicator(
-                      color: Color(0xFFE94560))),
+                      color: AppColors.kraft)),
               error: (e, _) => Center(
                   child: Text(e.toString(),
-                      style: const TextStyle(color: Colors.white))),
+                      style: const TextStyle(color: AppColors.ink))),
               data: (list) => ListView.builder(
                 controller: ctrl,
                 itemCount: list.length,
                 itemBuilder: (_, i) => ListTile(
                   leading: Icon(_typeIcon(list[i].type),
-                      color: const Color(0xFFE94560)),
+                      color: AppColors.kraft),
                   title: Text(list[i].title,
-                      style: const TextStyle(color: Colors.white)),
+                      style: const TextStyle(color: AppColors.ink)),
                   onTap: () {
                     ref
                         .read(playlistEditorProvider.notifier)

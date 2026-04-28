@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/price_list_model.dart';
@@ -57,17 +58,17 @@ class _CreatePriceListScreenState extends ConsumerState<CreatePriceListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.paper,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF16213E),
-        title: const Text('Fiyat Listesi', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.paper2,
+        title: const Text('Fiyat Listesi', style: TextStyle(color: AppColors.ink)),
+        iconTheme: const IconThemeData(color: AppColors.ink),
         actions: [
           TextButton(
             onPressed: _save,
             child: const Text('Kaydet',
                 style: TextStyle(
-                    color: Color(0xFFE94560), fontWeight: FontWeight.bold)),
+                    color: AppColors.kraft, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -77,12 +78,12 @@ class _CreatePriceListScreenState extends ConsumerState<CreatePriceListScreen> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _titleCtrl,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.ink),
               decoration: InputDecoration(
                 labelText: 'Liste Başlığı',
-                labelStyle: const TextStyle(color: Colors.white54),
+                labelStyle: const TextStyle(color: AppColors.muted),
                 filled: true,
-                fillColor: const Color(0xFF0F3460),
+                fillColor: AppColors.paper2,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none),
@@ -111,11 +112,11 @@ class _CreatePriceListScreenState extends ConsumerState<CreatePriceListScreen> {
             padding: const EdgeInsets.all(16),
             child: OutlinedButton.icon(
               onPressed: _addEntry,
-              icon: const Icon(Icons.add, color: Color(0xFFE94560)),
+              icon: const Icon(Icons.add, color: AppColors.kraft),
               label: const Text('Satır Ekle',
-                  style: TextStyle(color: Color(0xFFE94560))),
+                  style: TextStyle(color: AppColors.kraft)),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFE94560)),
+                side: const BorderSide(color: AppColors.kraft),
                 minimumSize: const Size(double.infinity, 48),
               ),
             ),
@@ -178,24 +179,24 @@ class _EntryRowState extends State<_EntryRow> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF16213E),
+        color: AppColors.paper2,
         borderRadius: BorderRadius.circular(8),
         border: _highlighted
-            ? Border.all(color: const Color(0xFFE94560), width: 1)
+            ? Border.all(color: AppColors.kraft, width: 1)
             : null,
       ),
       child: Row(
         children: [
-          const Icon(Icons.drag_handle, color: Colors.white38, size: 20),
+          const Icon(Icons.drag_handle, color: AppColors.muted, size: 20),
           const SizedBox(width: 8),
           Expanded(
             flex: 3,
             child: TextField(
               controller: _name,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-              decoration: const InputDecoration(
+              style: const TextStyle(color: AppColors.ink, fontSize: 13),
+              decoration: InputDecoration(
                 hintText: 'Ürün adı',
-                hintStyle: TextStyle(color: Colors.white24),
+                hintStyle: TextStyle(color: AppColors.line.withValues(alpha: 0.2)),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -206,10 +207,10 @@ class _EntryRowState extends State<_EntryRow> {
             width: 50,
             child: TextField(
               controller: _unit,
-              style: const TextStyle(color: Colors.white54, fontSize: 12),
-              decoration: const InputDecoration(
+              style: const TextStyle(color: AppColors.muted, fontSize: 12),
+              decoration: InputDecoration(
                 hintText: 'Birim',
-                hintStyle: TextStyle(color: Colors.white24),
+                hintStyle: TextStyle(color: AppColors.line.withValues(alpha: 0.2)),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -220,10 +221,10 @@ class _EntryRowState extends State<_EntryRow> {
             width: 70,
             child: TextField(
               controller: _price,
-              style: const TextStyle(color: Color(0xFFE94560), fontSize: 13),
-              decoration: const InputDecoration(
+              style: const TextStyle(color: AppColors.kraft, fontSize: 13),
+              decoration: InputDecoration(
                 hintText: 'Fiyat',
-                hintStyle: TextStyle(color: Colors.white24),
+                hintStyle: TextStyle(color: AppColors.line.withValues(alpha: 0.2)),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -233,7 +234,7 @@ class _EntryRowState extends State<_EntryRow> {
           IconButton(
             icon: Icon(
               Icons.star,
-              color: _highlighted ? const Color(0xFFE94560) : Colors.white24,
+              color: _highlighted ? AppColors.kraft : AppColors.line.withValues(alpha: 0.2),
               size: 18,
             ),
             onPressed: () {
@@ -242,7 +243,7 @@ class _EntryRowState extends State<_EntryRow> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white38, size: 18),
+            icon: const Icon(Icons.close, color: AppColors.muted, size: 18),
             onPressed: widget.onRemove,
           ),
         ],

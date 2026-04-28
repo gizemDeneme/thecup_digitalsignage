@@ -7,6 +7,18 @@ service cloud.firestore {
              exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    function isSuperAdmin() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
+    function isActiveAdmin() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
     // TV app reads without auth; only admin can write
     match /playlists/{doc} {
       allow read: if true;
@@ -19,9 +31,23 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Only admin can access admin records
+    // Admin records: any admin can read; only super_admin can write.
+    // A user can update their own lastLoginAt field.
     match /admins/{uid} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow create, delete: if isSuperAdmin();
+      allow update: if isSuperAdmin()
+        || (request.auth != null && request.auth.uid == uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['lastLoginAt']));
+    }
+
+    // Audit logs: append-only. Any admin can read & create; nobody updates/deletes.
+    match /audit_logs/{doc} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
     }
   }
 }
