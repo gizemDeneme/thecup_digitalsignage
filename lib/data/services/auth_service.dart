@@ -18,6 +18,10 @@ class AuthService {
     await _auth.signOut();
   }
 
+  Future<void> sendPasswordReset(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
   Future<bool> isCurrentUserAdmin() async {
     final user = _auth.currentUser;
     if (user == null) return false;

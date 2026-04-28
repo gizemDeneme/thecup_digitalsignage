@@ -19,6 +19,106 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _loading = false;
   String? _error;
 
+  Future<void> _showForgotPassword() async {
+    final emailCtrl = TextEditingController(text: _emailCtrl.text.trim());
+    String? dialogError;
+    bool sent = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateDialog) => AlertDialog(
+          title: const Text('şifre sıfırla'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'E-posta adresinize sıfırlama bağlantısı göndereceğiz.',
+                style: TextStyle(color: AppColors.muted, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              if (sent)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          color: AppColors.success, size: 16),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Bağlantı gönderildi. Gelen kutunuzu kontrol edin.',
+                          style: TextStyle(
+                              color: AppColors.success, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else ...[
+                TextField(
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: 'e-posta'),
+                ),
+                if (dialogError != null) ...[
+                  const SizedBox(height: 10),
+                  Text(dialogError!,
+                      style: const TextStyle(
+                          color: AppColors.danger, fontSize: 13)),
+                ],
+              ],
+            ],
+          ),
+          actions: sent
+              ? [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('tamam'),
+                  ),
+                ]
+              : [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('iptal'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final email = emailCtrl.text.trim();
+                      if (email.isEmpty) {
+                        setStateDialog(
+                            () => dialogError = 'E-posta adresi gerekli.');
+                        return;
+                      }
+                      try {
+                        await ref
+                            .read(authServiceProvider)
+                            .sendPasswordReset(email);
+                        setStateDialog(() {
+                          sent = true;
+                          dialogError = null;
+                        });
+                      } catch (_) {
+                        setStateDialog(() => dialogError =
+                            'Gönderilemedi. E-posta adresini kontrol edin.');
+                      }
+                    },
+                    child: const Text('gönder'),
+                  ),
+                ],
+        ),
+      ),
+    );
+
+    emailCtrl.dispose();
+  }
+
   Future<void> _signIn() async {
     setState(() {
       _loading = true;
@@ -85,6 +185,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     obscureText: true,
                     decoration: const InputDecoration(labelText: 'şifre'),
                     onSubmitted: (_) => _signIn(),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _showForgotPassword,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.muted,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 8),
+                      ),
+                      child: const Text('şifremi unuttum',
+                          style: TextStyle(fontSize: 13)),
+                    ),
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 14),
