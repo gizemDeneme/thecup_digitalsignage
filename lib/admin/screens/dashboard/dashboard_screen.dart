@@ -50,7 +50,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       icon: Icons.people_outline,
       label: 'kullanıcılar',
       screen: UsersScreen(),
-      superAdminOnly: true,
     ),
     _NavItem(
       icon: Icons.receipt_long_outlined,
