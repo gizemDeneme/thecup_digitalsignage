@@ -22,6 +22,10 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
   }
 
   Future<void> _bootstrap() async {
+    // Kendini Firestore'a kaydet (lastSeenAt güncelle)
+    final deviceId = ref.read(deviceIdProvider);
+    ref.read(screenRepositoryProvider).register(deviceId).ignore();
+
     ref.read(playlistControllerProvider.notifier).loadFromCache();
 
     ref.listenManual(

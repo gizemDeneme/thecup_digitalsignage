@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/firestore_paths.dart';
 import '../models/content_item_model.dart';
 import '../models/playlist_model.dart';
+import '../models/screen_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -67,5 +68,55 @@ class FirestoreService {
     final doc =
         await _db.collection(FirestorePaths.admins).doc(uid).get();
     return doc.exists;
+  }
+
+  // ─── Screens ───────────────────────────────────────────────────────────────
+
+  Stream<List<ScreenModel>> watchAllScreens() {
+    return _db
+        .collection(FirestorePaths.screens)
+        .orderBy('lastSeenAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((d) => ScreenModel.fromFirestore(d.id, d.data()))
+            .toList());
+  }
+
+  Stream<PlaylistModel?> watchScreenPlaylist(String deviceId) {
+    return _db
+        .collection(FirestorePaths.screens)
+        .doc(deviceId)
+        .snapshots()
+        .map((snap) {
+      if (!snap.exists || snap.data() == null) return null;
+      final raw = snap.data()!['playlist'];
+      if (raw == null) return null;
+      try {
+        return PlaylistModel.fromMap(raw as Map<String, dynamic>);
+      } catch (_) {
+        return null;
+      }
+    });
+  }
+
+  Future<void> registerScreen(String deviceId) async {
+    await _db.collection(FirestorePaths.screens).doc(deviceId).set(
+      {'lastSeenAt': FieldValue.serverTimestamp()},
+      SetOptions(merge: true),
+    );
+  }
+
+  Future<void> publishToScreen(String deviceId, PlaylistModel playlist) async {
+    await _db.collection(FirestorePaths.screens).doc(deviceId).set(
+      {'playlist': playlist.toMap()},
+      SetOptions(merge: true),
+    );
+  }
+
+  Future<void> updateScreenName(String deviceId, String name) async {
+    await _db
+        .collection(FirestorePaths.screens)
+        .doc(deviceId)
+        .set({'name': name}, SetOptions(merge: true));
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/service_locator.dart';
 import '../../data/models/playlist_model.dart';
 import '../../data/models/content_item_model.dart';
+import '../../data/repositories/screen_repository.dart';
 import '../../data/services/firestore_service.dart';
 import '../services/cache_service.dart';
 
@@ -13,8 +14,17 @@ final cacheServiceProvider = Provider<CacheService>((ref) => getIt<CacheService>
 final firestoreServiceProvider =
     Provider<FirestoreService>((ref) => getIt<FirestoreService>());
 
+final screenRepositoryProvider =
+    Provider<ScreenRepository>((ref) => getIt<ScreenRepository>());
+
+/// Bu TV'nin kalıcı cihaz kimliği. CacheService Hive'da saklar.
+final deviceIdProvider = Provider<String>(
+    (ref) => ref.read(cacheServiceProvider).getOrCreateDeviceId());
+
+/// Artık tüm TV'ler değil, sadece bu TV'nin kendi playlist'ini dinliyor.
 final playlistStreamProvider = StreamProvider<PlaylistModel?>((ref) {
-  return ref.watch(firestoreServiceProvider).watchActivePlaylist();
+  final deviceId = ref.read(deviceIdProvider);
+  return ref.watch(firestoreServiceProvider).watchScreenPlaylist(deviceId);
 });
 
 // ─── State ───────────────────────────────────────────────────────────────────

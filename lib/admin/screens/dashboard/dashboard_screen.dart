@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../audit/audit_logs_screen.dart';
 import '../content/content_library_screen.dart';
 import '../playlist/playlist_editor_screen.dart';
+import '../screens/screens_list_screen.dart';
 import '../users/users_screen.dart';
 
 /// Tab tanımı.
@@ -45,6 +46,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       icon: Icons.playlist_play_outlined,
       label: 'playlist',
       screen: PlaylistEditorScreen(),
+    ),
+    _NavItem(
+      icon: Icons.tv_outlined,
+      label: 'ekranlar',
+      screen: ScreensListScreen(),
     ),
     _NavItem(
       icon: Icons.people_outline,

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/models/playlist_model.dart';
 
@@ -12,6 +13,17 @@ class CacheService {
   Future<void> init() async {
     await Hive.initFlutter();
     _box = await Hive.openBox(AppConstants.hivePlaylistBox);
+  }
+
+  /// Her TV'ye özgü, kalıcı kimlik. İlk çalıştırmada UUID üretilir, sonraki
+  /// açılışlarda aynı değer döndürülür.
+  String getOrCreateDeviceId() {
+    const key = 'device_id';
+    final existing = _box.get(key);
+    if (existing != null) return existing as String;
+    final id = const Uuid().v4();
+    _box.put(key, id);
+    return id;
   }
 
   Future<void> savePlaylist(PlaylistModel playlist) async {

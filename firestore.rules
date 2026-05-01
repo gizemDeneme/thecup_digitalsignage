@@ -50,5 +50,15 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false;
     }
+
+    // Screens: TV unauthenticated olarak lastSeenAt günceller; admin her şeyi yönetir.
+    match /screens/{deviceId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeenAt'])
+        || isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }
