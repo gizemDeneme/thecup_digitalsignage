@@ -10,6 +10,15 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../thecup-release.jks")
+            storePassword = "thecup2024!"
+            keyAlias = "thecup"
+            keyPassword = "thecup2024!"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -44,7 +53,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
