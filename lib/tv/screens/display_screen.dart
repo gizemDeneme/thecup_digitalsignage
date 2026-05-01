@@ -53,7 +53,11 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          if (item == null)
+          // Grup atanmamışsa farklı bekleme ekranı göster
+          if (ref.watch(deviceGroupProvider).value == null &&
+              !ref.watch(deviceGroupProvider).isLoading)
+            _UnassignedScreen(deviceId: ref.read(deviceIdProvider))
+          else if (item == null)
             const _WaitingScreen()
           else
             _buildContent(item),
@@ -94,6 +98,63 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
           },
         );
       },
+    );
+  }
+}
+
+/// Grup atanmamış TV'de gösterilir — admin panelinden bu cihaz ID'si ile atama yapılır.
+class _UnassignedScreen extends StatelessWidget {
+  final String deviceId;
+  const _UnassignedScreen({required this.deviceId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF1A1A2E),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'thecup',
+              style: TextStyle(
+                color: Color(0xFFE94560),
+                fontSize: 60,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 4,
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Bu ekran henüz atanmadı.',
+              style: TextStyle(color: Colors.white54, fontSize: 22),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Admin panelinden aşağıdaki cihaz ID\'sini Ekran 1 veya Ekran 2\'ye atayın:',
+              style: TextStyle(color: Colors.white38, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                deviceId,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 18,
+                  fontFamily: 'monospace',
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

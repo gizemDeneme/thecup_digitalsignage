@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/firestore_paths.dart';
 import '../models/content_item_model.dart';
 import '../models/playlist_model.dart';
+import '../models/screen_group_model.dart';
 import '../models/screen_model.dart';
 
 class FirestoreService {
@@ -70,7 +71,7 @@ class FirestoreService {
     return doc.exists;
   }
 
-  // ─── Screens ───────────────────────────────────────────────────────────────
+  // ─── Screens (cihaz kaydı ve grup ataması) ─────────────────────────────────
 
   Stream<List<ScreenModel>> watchAllScreens() {
     return _db
@@ -82,10 +83,61 @@ class FirestoreService {
             .toList());
   }
 
-  Stream<PlaylistModel?> watchScreenPlaylist(String deviceId) {
+  /// TV kendi grubunu öğrenmek için kendi dokümanını dinler.
+  Stream<String?> watchDeviceGroup(String deviceId) {
     return _db
         .collection(FirestorePaths.screens)
         .doc(deviceId)
+        .snapshots()
+        .map((snap) => snap.data()?['groupId'] as String?);
+  }
+
+  Future<void> registerScreen(String deviceId) async {
+    await _db.collection(FirestorePaths.screens).doc(deviceId).set(
+      {'lastSeenAt': FieldValue.serverTimestamp()},
+      SetOptions(merge: true),
+    );
+  }
+
+  Future<void> assignScreenToGroup(String deviceId, String? groupId) async {
+    await _db.collection(FirestorePaths.screens).doc(deviceId).set(
+      {'groupId': groupId},
+      SetOptions(merge: true),
+    );
+  }
+
+  Future<void> updateScreenName(String deviceId, String name) async {
+    await _db
+        .collection(FirestorePaths.screens)
+        .doc(deviceId)
+        .set({'name': name}, SetOptions(merge: true));
+  }
+
+  Future<void> deleteScreen(String deviceId) async {
+    await _db.collection(FirestorePaths.screens).doc(deviceId).delete();
+  }
+
+  // ─── Screen Groups (Ekran 1 / Ekran 2) ─────────────────────────────────────
+
+  static const List<Map<String, String>> defaultGroups = [
+    {'id': 'ekran_1', 'name': 'Ekran 1'},
+    {'id': 'ekran_2', 'name': 'Ekran 2'},
+  ];
+
+  Stream<List<ScreenGroupModel>> watchAllGroups() {
+    return _db
+        .collection(FirestorePaths.screenGroups)
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((d) => ScreenGroupModel.fromFirestore(d.id, d.data()))
+            .toList());
+  }
+
+  /// TV'nin kendi grubunun playlist'ini dinler.
+  Stream<PlaylistModel?> watchGroupPlaylist(String groupId) {
+    return _db
+        .collection(FirestorePaths.screenGroups)
+        .doc(groupId)
         .snapshots()
         .map((snap) {
       if (!snap.exists || snap.data() == null) return null;
@@ -99,24 +151,26 @@ class FirestoreService {
     });
   }
 
-  Future<void> registerScreen(String deviceId) async {
-    await _db.collection(FirestorePaths.screens).doc(deviceId).set(
-      {'lastSeenAt': FieldValue.serverTimestamp()},
-      SetOptions(merge: true),
-    );
-  }
-
-  Future<void> publishToScreen(String deviceId, PlaylistModel playlist) async {
-    await _db.collection(FirestorePaths.screens).doc(deviceId).set(
-      {'playlist': playlist.toMap()},
-      SetOptions(merge: true),
-    );
-  }
-
-  Future<void> updateScreenName(String deviceId, String name) async {
+  Future<void> publishToGroup(String groupId, PlaylistModel playlist) async {
     await _db
-        .collection(FirestorePaths.screens)
-        .doc(deviceId)
-        .set({'name': name}, SetOptions(merge: true));
+        .collection(FirestorePaths.screenGroups)
+        .doc(groupId)
+        .set({'playlist': playlist.toMap()}, SetOptions(merge: true));
+  }
+
+  /// Grupları ilk kez oluşturur (Ekran 1, Ekran 2). Varsa dokunmaz.
+  Future<void> ensureDefaultGroups() async {
+    for (final g in defaultGroups) {
+      final doc = await _db
+          .collection(FirestorePaths.screenGroups)
+          .doc(g['id']!)
+          .get();
+      if (!doc.exists) {
+        await _db
+            .collection(FirestorePaths.screenGroups)
+            .doc(g['id']!)
+            .set({'name': g['name']!});
+      }
+    }
   }
 }

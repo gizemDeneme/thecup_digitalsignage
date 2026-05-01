@@ -51,7 +51,7 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Screens: TV unauthenticated olarak lastSeenAt günceller; admin her şeyi yönetir.
+    // Screens: TV lastSeenAt günceller; admin grup ataması ve silme yapabilir.
     match /screens/{deviceId} {
       allow read: if true;
       allow create: if true;
@@ -59,6 +59,12 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeenAt'])
         || isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // Screen groups (Ekran 1 / Ekran 2): TV okur; admin yazar.
+    match /screen_groups/{groupId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

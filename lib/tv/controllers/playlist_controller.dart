@@ -21,10 +21,18 @@ final screenRepositoryProvider =
 final deviceIdProvider = Provider<String>(
     (ref) => ref.read(cacheServiceProvider).getOrCreateDeviceId());
 
-/// Artık tüm TV'ler değil, sadece bu TV'nin kendi playlist'ini dinliyor.
-final playlistStreamProvider = StreamProvider<PlaylistModel?>((ref) {
+/// Bu TV'nin bağlı olduğu grup ID'si (ekran_1 / ekran_2 / null).
+final deviceGroupProvider = StreamProvider<String?>((ref) {
   final deviceId = ref.read(deviceIdProvider);
-  return ref.watch(firestoreServiceProvider).watchScreenPlaylist(deviceId);
+  return ref.read(firestoreServiceProvider).watchDeviceGroup(deviceId);
+});
+
+/// Grubun playlist'ini dinler. Grup atanmamışsa null döndürür.
+final playlistStreamProvider = StreamProvider<PlaylistModel?>((ref) {
+  final groupAsync = ref.watch(deviceGroupProvider);
+  final groupId = groupAsync.value;
+  if (groupId == null) return Stream.value(null);
+  return ref.watch(firestoreServiceProvider).watchGroupPlaylist(groupId);
 });
 
 // ─── State ───────────────────────────────────────────────────────────────────

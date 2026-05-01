@@ -5,43 +5,36 @@ class ScreenModel {
   final String deviceId;
   final String name;
   final DateTime lastSeenAt;
-  final PlaylistModel? playlist;
+  final String? groupId;   // "ekran_1" | "ekran_2" | null (atanmamış)
 
   const ScreenModel({
     required this.deviceId,
     required this.name,
     required this.lastSeenAt,
-    this.playlist,
+    this.groupId,
   });
 
   factory ScreenModel.fromFirestore(String id, Map<String, dynamic> data) {
-    PlaylistModel? playlist;
-    final raw = data['playlist'];
-    if (raw != null) {
-      try {
-        playlist = PlaylistModel.fromMap(raw as Map<String, dynamic>);
-      } catch (_) {}
-    }
     return ScreenModel(
       deviceId: id,
       name: data['name'] as String? ?? id,
       lastSeenAt: (data['lastSeenAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      playlist: playlist,
+      groupId: data['groupId'] as String?,
     );
   }
 
   Map<String, dynamic> toFirestore() => {
         'name': name,
         'lastSeenAt': Timestamp.fromDate(lastSeenAt),
-        if (playlist != null) 'playlist': playlist!.toMap(),
+        if (groupId != null) 'groupId': groupId,
       };
 
-  ScreenModel copyWith({String? name, DateTime? lastSeenAt, PlaylistModel? playlist}) {
+  ScreenModel copyWith({String? name, DateTime? lastSeenAt, String? groupId}) {
     return ScreenModel(
       deviceId: deviceId,
       name: name ?? this.name,
       lastSeenAt: lastSeenAt ?? this.lastSeenAt,
-      playlist: playlist ?? this.playlist,
+      groupId: groupId ?? this.groupId,
     );
   }
 

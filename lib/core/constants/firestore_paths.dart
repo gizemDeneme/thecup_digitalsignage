@@ -5,4 +5,5 @@ class FirestorePaths {
   static const String admins = 'admins';
   static const String auditLogs = 'audit_logs';
   static const String screens = 'screens';
+  static const String screenGroups = 'screen_groups';
 }
