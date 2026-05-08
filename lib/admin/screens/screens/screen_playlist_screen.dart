@@ -75,6 +75,7 @@ class ScreenPlaylistScreen extends ConsumerWidget {
                   child: ReorderableListView.builder(
                     padding:
                         const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                    buildDefaultDragHandles: false,
                     itemCount: items.length,
                     onReorder: (o, n) {
                       ref
@@ -187,7 +188,10 @@ class _GroupPlaylistItemTile extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(8, 8, 4, 8),
         child: Row(
           children: [
-            const Icon(Icons.drag_handle, color: AppColors.muted),
+            ReorderableDragStartListener(
+              index: index,
+              child: const Icon(Icons.drag_handle, color: AppColors.muted),
+            ),
             const SizedBox(width: 8),
             Icon(typeIcon, color: AppColors.kraft, size: 20),
             const SizedBox(width: 8),
