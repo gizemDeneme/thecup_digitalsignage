@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'playlist_model.dart';
 
 class ScreenModel {
   final String deviceId;

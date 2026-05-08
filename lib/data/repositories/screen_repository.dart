@@ -39,14 +39,13 @@ class ScreenRepository {
   Stream<String?> watchDeviceGroup(String deviceId) =>
       _firestore.watchDeviceGroup(deviceId);
 
-  Future<void> publishToGroup(
-      String groupId, List<PlaylistItem> items, {String source = 'screen'}) async {
+  Future<void> publishToGroup(String groupId, List<PlaylistItem> items) async {
     final playlist = PlaylistModel(
       id: _uuid.v4(),
       publishedAt: DateTime.now(),
       items: items,
     );
-    await _firestore.publishToGroup(groupId, playlist, source: source);
+    await _firestore.publishToGroup(groupId, playlist);
   }
 
   Future<void> setGroupPaused(String groupId, bool paused) =>

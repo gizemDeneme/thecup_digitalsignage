@@ -42,27 +42,6 @@ class FirestoreService {
     return snap.docs.map((d) => ContentItemModel.fromFirestore(d)).toList();
   }
 
-  // ─── Playlist ──────────────────────────────────────────────────────────────
-
-  Future<void> publishPlaylist(PlaylistModel playlist) async {
-    await _db
-        .doc(FirestorePaths.activePlaylist)
-        .set(playlist.toMap());
-  }
-
-  Stream<PlaylistModel?> watchActivePlaylist() {
-    return _db.doc(FirestorePaths.activePlaylist).snapshots().map((snap) {
-      if (!snap.exists || snap.data() == null) return null;
-      return PlaylistModel.fromMap(snap.data()!);
-    });
-  }
-
-  Future<PlaylistModel?> getActivePlaylist() async {
-    final doc = await _db.doc(FirestorePaths.activePlaylist).get();
-    if (!doc.exists || doc.data() == null) return null;
-    return PlaylistModel.fromMap(doc.data()!);
-  }
-
   // ─── Admin check ───────────────────────────────────────────────────────────
 
   Future<bool> isAdmin(String uid) async {
@@ -151,15 +130,11 @@ class FirestoreService {
     });
   }
 
-  Future<void> publishToGroup(String groupId, PlaylistModel playlist,
-      {String source = 'screen'}) async {
+  Future<void> publishToGroup(String groupId, PlaylistModel playlist) async {
     await _db
         .collection(FirestorePaths.screenGroups)
         .doc(groupId)
-        .set({
-          'playlist': playlist.toMap(),
-          'publishSource': source,
-        }, SetOptions(merge: true));
+        .set({'playlist': playlist.toMap()}, SetOptions(merge: true));
   }
 
   Future<void> setGroupPaused(String groupId, bool paused) async {

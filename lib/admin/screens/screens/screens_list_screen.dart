@@ -159,11 +159,6 @@ class _GroupTab extends ConsumerWidget {
               ],
             ),
           ),
-          // Aktif mod badge
-          if (group.publishSource != null) ...[
-            const SizedBox(height: 10),
-            _ActiveModeBadge(source: group.publishSource!),
-          ],
           // Aktif playlist içerikleri
           if (group.playlist != null && group.playlist!.items.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -245,45 +240,6 @@ class _GroupTab extends ConsumerWidget {
   }
 }
 
-// ─── Aktif Mod Badge ──────────────────────────────────────────────────────────
-
-class _ActiveModeBadge extends StatelessWidget {
-  final String source;
-  const _ActiveModeBadge({required this.source});
-
-  @override
-  Widget build(BuildContext context) {
-    final isPlaylist = source == 'playlist';
-    final color = isPlaylist ? AppColors.kraft : AppColors.success;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color, width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isPlaylist ? Icons.playlist_play : Icons.tv,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            isPlaylist ? 'Playlist yayını aktif' : 'Ekran bazlı yayın aktif',
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── Cihazlar Paneli ──────────────────────────────────────────────────────────
 
@@ -378,11 +334,6 @@ class _DeviceTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final groupLabel = switch (screen.groupId) {
-      'ekran_1' => 'Ekran 1',
-      'ekran_2' => 'Ekran 2',
-      _ => 'Atanmadı',
-    };
 
     return Container(
       margin: const EdgeInsets.only(bottom: 6),

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'playlist_model.dart';
 
 /// "Ekran 1" veya "Ekran 2" gibi bir grup.
@@ -8,14 +7,11 @@ class ScreenGroupModel {
   final String name;       // "Ekran 1"
   final PlaylistModel? playlist;
   final bool paused;
-  final String? publishSource; // 'playlist' | 'screen' | null
-
   const ScreenGroupModel({
     required this.id,
     required this.name,
     this.playlist,
     this.paused = false,
-    this.publishSource,
   });
 
   factory ScreenGroupModel.fromFirestore(String id, Map<String, dynamic> data) {
@@ -31,7 +27,6 @@ class ScreenGroupModel {
       name: data['name'] as String? ?? id,
       playlist: playlist,
       paused: data['paused'] as bool? ?? false,
-      publishSource: data['publishSource'] as String?,
     );
   }
 
