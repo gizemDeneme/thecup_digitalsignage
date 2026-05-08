@@ -114,8 +114,8 @@ class PublishScreen extends ConsumerWidget {
       final items = ref.read(playlistEditorProvider);
       final screenRepo = ref.read(screenRepositoryProvider);
       await Future.wait([
-        screenRepo.publishToGroup('ekran_1', items),
-        screenRepo.publishToGroup('ekran_2', items),
+        screenRepo.publishToGroup('ekran_1', items, source: 'playlist'),
+        screenRepo.publishToGroup('ekran_2', items, source: 'playlist'),
         screenRepo.setGroupPaused('ekran_1', false),
         screenRepo.setGroupPaused('ekran_2', false),
       ]);

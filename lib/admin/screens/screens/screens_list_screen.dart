@@ -103,7 +103,6 @@ class _GroupTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(groupEditorProvider(group.id));
     final count = group.playlist?.items.length;
 
     return SingleChildScrollView(
@@ -160,6 +159,11 @@ class _GroupTab extends ConsumerWidget {
               ],
             ),
           ),
+          // Aktif mod badge
+          if (group.publishSource != null) ...[
+            const SizedBox(height: 10),
+            _ActiveModeBadge(source: group.publishSource!),
+          ],
           // Aktif playlist içerikleri
           if (group.playlist != null && group.playlist!.items.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -205,17 +209,27 @@ class _GroupTab extends ConsumerWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ScreenPlaylistScreen(group: group),
-                ),
-              ),
+              onPressed: () {
+                final playlist = group.playlist;
+                if (playlist != null && playlist.items.isNotEmpty) {
+                  ref
+                      .read(groupEditorProvider(group.id).notifier)
+                      .loadFromPlaylist(playlist);
+                } else {
+                  ref.read(groupEditorProvider(group.id).notifier).clear();
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ScreenPlaylistScreen(group: group),
+                  ),
+                );
+              },
               icon: const Icon(Icons.edit_outlined, color: AppColors.ink),
               label: Text(
-                items.isEmpty
+                (group.playlist == null || group.playlist!.items.isEmpty)
                     ? 'Playlist Oluştur'
-                    : 'Playlist Düzenle (${items.length} içerik)',
+                    : 'Playlist Düzenle (${group.playlist!.items.length} içerik)',
                 style: const TextStyle(color: AppColors.ink),
               ),
               style: ElevatedButton.styleFrom(
@@ -223,6 +237,46 @@ class _GroupTab extends ConsumerWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Aktif Mod Badge ──────────────────────────────────────────────────────────
+
+class _ActiveModeBadge extends StatelessWidget {
+  final String source;
+  const _ActiveModeBadge({required this.source});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPlaylist = source == 'playlist';
+    final color = isPlaylist ? AppColors.kraft : AppColors.success;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPlaylist ? Icons.playlist_play : Icons.tv,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            isPlaylist ? 'Playlist yayını aktif' : 'Ekran bazlı yayın aktif',
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

@@ -151,11 +151,15 @@ class FirestoreService {
     });
   }
 
-  Future<void> publishToGroup(String groupId, PlaylistModel playlist) async {
+  Future<void> publishToGroup(String groupId, PlaylistModel playlist,
+      {String source = 'screen'}) async {
     await _db
         .collection(FirestorePaths.screenGroups)
         .doc(groupId)
-        .set({'playlist': playlist.toMap()}, SetOptions(merge: true));
+        .set({
+          'playlist': playlist.toMap(),
+          'publishSource': source,
+        }, SetOptions(merge: true));
   }
 
   Future<void> setGroupPaused(String groupId, bool paused) async {
