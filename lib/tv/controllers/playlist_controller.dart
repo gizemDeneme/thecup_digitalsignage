@@ -35,6 +35,13 @@ final playlistStreamProvider = StreamProvider<PlaylistModel?>((ref) {
   return ref.watch(firestoreServiceProvider).watchGroupPlaylist(groupId);
 });
 
+/// Grubun durdurulup durdurulmadığını dinler.
+final groupPausedProvider = StreamProvider<bool>((ref) {
+  final groupId = ref.watch(deviceGroupProvider).value;
+  if (groupId == null) return Stream.value(false);
+  return ref.watch(firestoreServiceProvider).watchGroupPaused(groupId);
+});
+
 // ─── State ───────────────────────────────────────────────────────────────────
 
 class PlaylistState {

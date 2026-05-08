@@ -49,6 +49,12 @@ class ScreenRepository {
     await _firestore.publishToGroup(groupId, playlist);
   }
 
+  Future<void> setGroupPaused(String groupId, bool paused) =>
+      _firestore.setGroupPaused(groupId, paused);
+
+  Stream<bool> watchGroupPaused(String groupId) =>
+      _firestore.watchGroupPaused(groupId);
+
   Future<void> ensureDefaultGroups() =>
       _firestore.ensureDefaultGroups();
 }

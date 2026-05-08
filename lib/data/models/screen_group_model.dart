@@ -7,11 +7,13 @@ class ScreenGroupModel {
   final String id;         // "ekran_1" | "ekran_2"
   final String name;       // "Ekran 1"
   final PlaylistModel? playlist;
+  final bool paused;
 
   const ScreenGroupModel({
     required this.id,
     required this.name,
     this.playlist,
+    this.paused = false,
   });
 
   factory ScreenGroupModel.fromFirestore(String id, Map<String, dynamic> data) {
@@ -26,6 +28,7 @@ class ScreenGroupModel {
       id: id,
       name: data['name'] as String? ?? id,
       playlist: playlist,
+      paused: data['paused'] as bool? ?? false,
     );
   }
 

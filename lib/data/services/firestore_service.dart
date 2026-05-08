@@ -158,6 +158,21 @@ class FirestoreService {
         .set({'playlist': playlist.toMap()}, SetOptions(merge: true));
   }
 
+  Future<void> setGroupPaused(String groupId, bool paused) async {
+    await _db
+        .collection(FirestorePaths.screenGroups)
+        .doc(groupId)
+        .set({'paused': paused}, SetOptions(merge: true));
+  }
+
+  Stream<bool> watchGroupPaused(String groupId) {
+    return _db
+        .collection(FirestorePaths.screenGroups)
+        .doc(groupId)
+        .snapshots()
+        .map((snap) => snap.data()?['paused'] as bool? ?? false);
+  }
+
   /// Grupları ilk kez oluşturur (Ekran 1, Ekran 2). Varsa dokunmaz.
   Future<void> ensureDefaultGroups() async {
     for (final g in defaultGroups) {

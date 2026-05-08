@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/content_item_model.dart';
@@ -15,10 +16,18 @@ class DisplayScreen extends ConsumerStatefulWidget {
 }
 
 class _DisplayScreenState extends ConsumerState<DisplayScreen> {
+  Timer? _heartbeatTimer;
+
   @override
   void initState() {
     super.initState();
     _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    _heartbeatTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _bootstrap() async {
@@ -41,6 +50,11 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
         }
       },
     );
+
+    _heartbeatTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => ref.read(screenRepositoryProvider).register(deviceId).ignore(),
+    );
   }
 
   @override
@@ -57,6 +71,8 @@ class _DisplayScreenState extends ConsumerState<DisplayScreen> {
           if (ref.watch(deviceGroupProvider).value == null &&
               !ref.watch(deviceGroupProvider).isLoading)
             _UnassignedScreen(deviceId: ref.read(deviceIdProvider))
+          else if (ref.watch(groupPausedProvider).value == true)
+            const _WaitingScreen()
           else if (item == null)
             const _WaitingScreen()
           else

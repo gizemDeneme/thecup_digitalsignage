@@ -17,6 +17,8 @@ class ContentRepository {
 
   Future<List<ContentItemModel>> getAll() => _firestore.getAllContent();
 
+  Future<ContentItemModel?> getById(String id) => _firestore.getContent(id);
+
   /// Resizes image to max 1920px wide and compresses to JPEG 85%.
   Uint8List _compressImage(Uint8List bytes) {
     try {
