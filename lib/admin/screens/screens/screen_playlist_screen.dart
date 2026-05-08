@@ -112,9 +112,9 @@ class ScreenPlaylistScreen extends ConsumerWidget {
           child: CircularProgressIndicator(color: AppColors.kraft)),
     );
     try {
-      await ref
-          .read(screenRepositoryProvider)
-          .publishToGroup(group.id, items);
+      final repo = ref.read(screenRepositoryProvider);
+      await repo.publishToGroup(group.id, items);
+      await repo.setGroupPaused(group.id, false);
       await ref.read(auditServiceProvider).log(
             AuditAction.playlistPublish,
             targetId: group.id,
