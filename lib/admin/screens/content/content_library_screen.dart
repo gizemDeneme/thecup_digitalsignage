@@ -6,8 +6,6 @@ import '../../../data/models/content_item_model.dart';
 import '../../providers/content_provider.dart';
 import 'upload_video_screen.dart';
 import 'upload_image_screen.dart';
-import 'create_menu_screen.dart';
-import 'create_price_list_screen.dart';
 
 class ContentLibraryScreen extends ConsumerStatefulWidget {
   const ContentLibraryScreen({super.key});
@@ -22,10 +20,8 @@ class _ContentLibraryScreenState extends ConsumerState<ContentLibraryScreen>
   late TabController _tabController;
 
   final _tabs = [
-    (type: ContentType.video, label: 'videolar', icon: Icons.videocam_outlined),
     (type: ContentType.image, label: 'görseller', icon: Icons.image_outlined),
-    (type: ContentType.menu, label: 'menüler', icon: Icons.menu_book_outlined),
-    (type: ContentType.priceList, label: 'listeler', icon: Icons.list_alt_outlined),
+    (type: ContentType.video, label: 'videolar', icon: Icons.videocam_outlined),
   ];
 
   @override
@@ -67,11 +63,11 @@ class _ContentLibraryScreenState extends ConsumerState<ContentLibraryScreen>
 
   void _navigateToAdd(BuildContext context, ContentType type) {
     final screen = switch (type) {
-      ContentType.video => const UploadVideoScreen(),
       ContentType.image => const UploadImageScreen(),
-      ContentType.menu => const CreateMenuScreen(),
-      ContentType.priceList => const CreatePriceListScreen(),
+      ContentType.video => const UploadVideoScreen(),
+      _ => null,
     };
+    if (screen == null) return;
     Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
