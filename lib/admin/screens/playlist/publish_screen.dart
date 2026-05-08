@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/playlist_provider.dart';
 import '../../providers/audit_provider.dart';
+import '../../providers/playlist_provider.dart';
+import '../../providers/screen_provider.dart';
 import '../../../data/models/audit_log_model.dart';
 
 class PublishScreen extends ConsumerWidget {
@@ -37,7 +38,7 @@ class PublishScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             _summaryRow(Icons.play_circle, 'İçerik sayısı', '${items.length}'),
             _summaryRow(Icons.timer, 'Toplam süre', '${mins}d ${secs}s'),
-            _summaryRow(Icons.tv, 'Hedef', 'Tüm Türkiye bayileri'),
+            _summaryRow(Icons.tv, 'Hedef', 'Ekran 1 + Ekran 2'),
             const Spacer(),
             Container(
               padding: const EdgeInsets.all(16),
@@ -111,20 +112,27 @@ class PublishScreen extends ConsumerWidget {
 
     try {
       final items = ref.read(playlistEditorProvider);
-      await ref.read(playlistRepositoryProvider).publish(items);
+      final screenRepo = ref.read(screenRepositoryProvider);
+      await Future.wait([
+        screenRepo.publishToGroup('ekran_1', items),
+        screenRepo.publishToGroup('ekran_2', items),
+        screenRepo.setGroupPaused('ekran_1', false),
+        screenRepo.setGroupPaused('ekran_2', false),
+      ]);
       await ref.read(auditServiceProvider).log(
             AuditAction.playlistPublish,
             metadata: {
               'itemCount': items.length,
               'totalSeconds':
                   items.fold<int>(0, (a, b) => a + b.durationSeconds),
+              'targets': ['ekran_1', 'ekran_2'],
             },
           );
       if (context.mounted) {
         Navigator.of(context).pop(); // close dialog
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tüm ekranlara yayınlandı!'),
+            content: Text('Ekran 1 ve Ekran 2\'ye yayınlandı!'),
             backgroundColor: Color(0xFF4CAF50),
           ),
         );
