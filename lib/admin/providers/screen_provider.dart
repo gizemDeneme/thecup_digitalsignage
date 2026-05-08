@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../data/models/content_item_model.dart';
 import '../../data/models/playlist_model.dart';
@@ -26,11 +25,9 @@ class PlaylistEditorNotifier extends StateNotifier<List<PlaylistItem>> {
   PlaylistEditorNotifier() : super([]);
 
   void addItem(ContentItemModel content) {
-    final duration = switch (content.type) {
-      ContentType.video => AppConstants.defaultImageDurationSeconds,
-      ContentType.image => AppConstants.defaultImageDurationSeconds,
-      ContentType.menu => AppConstants.defaultMenuDurationSeconds,
-      ContentType.priceList => AppConstants.defaultPriceListDurationSeconds,
+    final duration = switch (content) {
+      VideoItemModel v => v.durationSeconds,
+      _ => 5,
     };
     state = [
       ...state,
